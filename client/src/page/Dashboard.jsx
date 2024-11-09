@@ -4,13 +4,10 @@ import Sidebar from "../component/Sidebar/Sidebar";
 import { useEffect, useState } from "react";
 
 const Dashboard = () => {
-  const { plans } = useLoaderData();
+  const { plans } = useLoaderData(); // Dữ liệu ban đầu từ loader
   const [updatedPlans, setUpdatedPlans] = useState(plans);
 
-  useEffect(() => {
-    setUpdatedPlans(plans);
-  }, [plans]);
-
+  // Hàm xử lý xóa plan
   const handleDeletePlan = (deletedPlanId) => {
     setUpdatedPlans((prevPlans) =>
       prevPlans.filter((plan) => plan.id !== deletedPlanId)

@@ -5,7 +5,9 @@ export const plansLoader = async () => {
     plans {
       id
       name
-      startDate 
+      startDate
+      autoPlan
+      updatedAt
 }
   }`;
 

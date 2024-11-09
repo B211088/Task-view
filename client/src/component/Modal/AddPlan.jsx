@@ -3,11 +3,11 @@ import { addNewPlan, addNewPriority } from "../../utils/plansUtils"; // Import t
 import Priority from "./Priority";
 import useDebounce from "./useDebounce";
 import { useState, useRef, useEffect } from "react";
+import NotificationModal from "./NotificationModal";
 
-const AddPlan = ({ onClose, onAddPlan }) => {
+const AddPlan = ({ onCloseModal, onAddPlan }) => {
   const [isOnPriority, setIsOnPriority] = useState(false);
   const [isOnMaxTasks, setIsOnMaxTasks] = useState(false);
-  const nagative = useNavigate();
   const [priority, setPriority] = useState([
     {
       name: "",
@@ -34,19 +34,26 @@ const AddPlan = ({ onClose, onAddPlan }) => {
 
   console.log(data);
 
-  const [error, setError] = useState("");
-  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+  const [notifyModal, setNotifyModal] = useState(false);
 
-  const closeErrorModal = (e) => {
+  const closeNotifyModal = (e) => {
     e.stopPropagation();
-    setShowErrorModal(false);
-    setError("");
+    setNotifyModal(false);
+  };
+
+  const openNotifyModal = () => {
+    setNotifyModal(true);
   };
 
   const handleAddNewPlan = async () => {
     if (!data.name || !data.startDate) {
-      setError("Vui lòng điền đầy đủ tên kế hoạch và ngày bắt đầu.");
-      setShowErrorModal(true);
+      openNotifyModal();
+      setNotify({
+        payload: "vui lòng điền đầy đủ Tên kế hoạch và ngày bắt đầu",
+        type: "error",
+      });
+      console.log("Missing data, returning early");
       return;
     }
 
@@ -72,9 +79,8 @@ const AddPlan = ({ onClose, onAddPlan }) => {
       }
     }
 
-    nagative("/");
-    onAddPlan(addPlan);
-    onClose();
+    onAddPlan();
+    onCloseModal();
   };
 
   // Hàm format ngày từ yyyy-mm-dd thành dd-mm-yyyy
@@ -154,7 +160,7 @@ const AddPlan = ({ onClose, onAddPlan }) => {
   };
 
   const handleOverlayClick = () => {
-    onClose();
+    onCloseModal();
   };
 
   return (
@@ -162,28 +168,8 @@ const AddPlan = ({ onClose, onAddPlan }) => {
       className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-10 px-[10px]"
       onClick={handleOverlayClick}
     >
-      {showErrorModal && (
-        <div
-          className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-10 px-[20px] "
-          onClick={closeErrorModal}
-        >
-          <div className="w-full h-full relative  ">
-            <div className="absolute top-[10%] right-[0%] flex items-center gap-[10px] sm:w-[20%] sm:min-w-[420px] min-w-[300px] w-full bg-bg-light  rounded-[5px] px-[20px] py-[20px]">
-              <div className="w-[10%] h-[30px]  text-[1.1rem] font-Nunito font-bold text-center flex items-center">
-                <i className="fa-solid fa-circle-exclamation"></i>
-              </div>
-              <div className=" w-[70%]">{error}</div>
-              <div className="w-[20%] flex justify-center gap-[10px]  items-center">
-                <button
-                  className="w-[100px] h-[36px] flex items-center justify-center bg-bg-btn-add rounded-[5px] text-[0.8rem] font-bold text-text-light"
-                  onClick={closeErrorModal}
-                >
-                  Đóng
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {notifyModal && (
+        <NotificationModal onCloseNotify={closeNotifyModal} notify={notify} />
       )}
       <div
         ref={modalRef}
@@ -299,7 +285,7 @@ const AddPlan = ({ onClose, onAddPlan }) => {
             </button>
             <button
               className="w-full h-[36px] flex items-center justify-center rounded-[5px] text-[0.8rem] font-bold text-text-dark-1000 border-1"
-              onClick={onClose}
+              onClick={onCloseModal}
             >
               Hủy
             </button>

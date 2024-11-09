@@ -1,27 +1,70 @@
-import AddPlan from "../Modal/AddPlan";
-import Plan from "../Plan/Plan";
-import Filter from "./Filter";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import AddPlan from "../Modal/AddPlan";
+import Plan from "../Plan/Plan";
+import ConfirmModal from "../Modal/ConfirmModal";
+import { deletePlan } from "../../utils/plansUtils";
 
 const Sidebar = ({ plans }) => {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [isAddPlanModalOpen, setIsAddPlanModalOpen] = useState(false);
   const [plansData, setPlansData] = useState(plans);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
   const filterRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+  const [planId, setPlanId] = useState("");
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
+  console.log(plans);
+
+  const closeConfirmModal = () => {
+    setConfirmModal(false);
+  };
+
+  const openConfirmModal = (planId) => {
+    setNotify({
+      payload: "Bạn có chắc chắn muốn xóa kế hoạch này?",
+      type: "error",
+    });
+    setConfirmModal(true);
+    setPlanId(planId);
+  };
+
+  const onConfirm = async () => {
+    try {
+      await deletePlan(planId);
+      closeConfirmModal();
+      setPlansData((prevPlans) =>
+        prevPlans.filter((plan) => plan.id !== planId)
+      );
+      navigate("/");
+    } catch (error) {
+      console.error("Lỗi khi xóa kế hoạch:", error);
+      alert("Xóa kế hoạch không thành công.");
+    }
+  };
 
   const toggleFilterModal = (e) => {
     e.stopPropagation();
-    setIsFilterVisible(!isFilterVisible);
+    setIsFilterVisible((prev) => !prev);
+  };
+
+  const handleSortOrderChange = (order) => {
+    setSortOrder(order);
+    if (isFilterVisible) {
+      setIsFilterVisible(false);
+    }
   };
 
   const openAddPlanModal = () => {
-    setSearchParams({ popup: "add-plan" });
+    if (popupName !== "add-plan") {
+      setSearchParams({ popup: "add-plan" });
+    }
   };
 
   const closeAddPlanModal = () => {
@@ -32,11 +75,28 @@ const Sidebar = ({ plans }) => {
     setPlansData((prevPlans) => [...prevPlans, newPlan]);
   };
 
+  const sortPlans = () => {
+    const sortedPlans = plansData
+      .filter((plan) =>
+        plan.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortOrder === "newest") {
+          return b.updatedAt - a.updatedAt;
+        } else if (sortOrder === "oldest") {
+          return a.updatedAt - b.updatedAt;
+        }
+        return 0;
+      });
+    return sortedPlans;
+  };
+
   useEffect(() => {
     if (popupName === "add-plan") {
       setIsAddPlanModalOpen(true);
       return;
     }
+
     setIsAddPlanModalOpen(false);
 
     const handleClickOutside = (event) => {
@@ -48,15 +108,18 @@ const Sidebar = ({ plans }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [plans, popupName]);
-  console.log("PlanData", plansData);
+  }, [popupName]);
+
   return (
-    <div className="sm:w-full w-[62px] min-w-[62px]  height-container flex flex-col gap-[10px] sm:px-[8px] sm:py-[10px] py-[15px] px-[5px] border-1 shadow rounded-[5px] bg-bg-light">
+    <div
+      className="sm:w-full w-[62px] min-w-[62px] height-container flex flex-col gap-[10px] sm:px-[8px] sm:py-[10px] py-[15px] px-[5px] border-1 shadow rounded-[5px] bg-bg-light"
+      ref={filterRef}
+    >
       <div className="flex items-center gap-[10px] sm:justify-between justify-center">
         <h3 className="text-[0.8rem] font-Montserrat font-bold hidden sm:block">
           Kế hoạch của bạn
         </h3>
-        <div className="">
+        <div>
           <div
             className="square-container-m flex items-center justify-center bg-color-dark-700 text-[1.3rem] font-bold cursor-pointer rounded-[5px]"
             onClick={openAddPlanModal}
@@ -64,7 +127,10 @@ const Sidebar = ({ plans }) => {
             <i className="fa-solid fa-plus"></i>
           </div>
           {isAddPlanModalOpen && (
-            <AddPlan onClose={closeAddPlanModal} onAddPlan={handleAddPlan} />
+            <AddPlan
+              onCloseModal={closeAddPlanModal}
+              onAddPlan={handleAddPlan}
+            />
           )}
         </div>
       </div>
@@ -75,34 +141,63 @@ const Sidebar = ({ plans }) => {
               className="outline-none w-full rounded-[5px] px-[5px] search-input h-full"
               type="text"
               placeholder="Tìm kiếm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="square-container-m flex items-center justify-center">
             <i className="fa-solid fa-magnifying-glass"></i>
           </div>
         </div>
-        <div className="square-container-m flex items-center justify-center relative">
+        <div className="square-container-m flex items-center justify-center bg-color-dark-700 rounded-[5px] relative">
           <div
-            className="square-container-m flex items-center justify-center bg-color-dark-700 text-[1rem] font-bold cursor-pointer rounded-[5px]"
+            className="square-container-m flex items-center justify-center text-[1rem] font-bold cursor-pointer"
             onClick={toggleFilterModal}
-            ref={filterRef}
           >
             <i className="fa-solid fa-filter"></i>
           </div>
-          {isFilterVisible && <Filter />}
+          {isFilterVisible && (
+            <div className="absolute w-[120px] sm:top-[110%] top-[-4%] sm:left-[-250%] left-[151%] font-Nunito z-20 font-bold bg-bg-light border-1 border-cl-border rounded-[5px] text-[0.9rem] text-text-dark-700">
+              <div
+                className="w-full h-[34px] flex items-center justify-center text-center px-[10px] hover:bg-color-dark-900 cursor-pointer"
+                onClick={() => handleSortOrderChange("newest")}
+              >
+                <span>Tạo gần đây</span>
+              </div>
+              <div
+                className="w-full h-[34px] flex items-center justify-center text-center px-[10px] hover:bg-color-dark-900 cursor-pointer"
+                onClick={() => handleSortOrderChange("oldest")}
+              >
+                <span>Cũ nhất</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
       <div className="w-full flex flex-col height-container-plans custom-scrollbar overflow-auto gap-[5px] mt-[20px]">
-        {plansData.map((plan, index) => (
-          <Link key={plan.id} to={`plans/${plan.id}`}>
+        {sortPlans().map((plan) => (
+          <Link
+            key={plan.id}
+            to={`plans/${plan.id}`}
+            onClick={() => setSelectedPlanId(plan.id)}
+          >
             <Plan
               plan={plan}
-              key={plan.id}
               isActive={selectedPlanId === plan.id}
-              onClick={() => setSelectedPlanId(plan.id)}
+              openConfirmModal={openConfirmModal}
             />
           </Link>
         ))}
+
+        {confirmModal && (
+          <ConfirmModal
+            onClose={closeConfirmModal}
+            onConfirm={onConfirm}
+            notify={notify}
+            planId={planId}
+          />
+        )}
       </div>
     </div>
   );

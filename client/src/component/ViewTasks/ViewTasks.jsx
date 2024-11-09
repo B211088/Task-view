@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLoaderData, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import AddTask from "../Modal/AddTask";
 import ListTask from "./ListTask";
-import { deletePlan } from "../../utils/plansUtils";
 
 const ViewTasks = () => {
   const { plan } = useLoaderData();
   const { tasks, autoPlan, startDate, maxTasksPerDay } = plan;
   const [isAddModal, setIsAddModal] = useState(false);
   const [scheduledTasks, setScheduledTasks] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const popupName = searchParams.get("popup");
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (popupName === "add-task") {
+      setIsAddModal(true);
+      return;
+    }
+    setIsAddModal(false);
+
     const scheduled = autoPlan
       ? autoScheduleTasks(tasks, startDate, maxTasksPerDay)
       : sortTasksByStartDay(tasks);
     setScheduledTasks(scheduled);
-  }, [plan, autoPlan, tasks]);
+  }, [plan, autoPlan, tasks, popupName]);
 
   const autoScheduleTasks = (
     tasks,
@@ -26,7 +38,9 @@ const ViewTasks = () => {
     const tasksByDay = {};
     const scheduledTasksMap = new Map();
 
-    tasks.sort((a, b) => (b.priority.point ?? 0) - (a.priority.point ?? 0));
+    if (tasks.priorities) {
+      tasks.sort((a, b) => (b.priority.point ?? 0) - (a.priority.point ?? 0));
+    }
 
     tasks.forEach((task) => {
       let taskStartDate = startDate;
@@ -129,8 +143,15 @@ const ViewTasks = () => {
     return tasksByDay;
   };
 
+  const openAddTaskMpdal = () => {
+    setSearchParams({ popup: "add-task" });
+  };
+
+  const closeAddTaskModal = () => {
+    navigate(-1);
+  };
+
   const addTaskSuccess = (newTask) => {
-    navigate(0);
     const updatedTasks = [...tasks, newTask];
     const scheduled = autoPlan
       ? autoScheduleTasks(updatedTasks, startDate, maxTasksPerDay)
@@ -138,46 +159,24 @@ const ViewTasks = () => {
     setScheduledTasks(scheduled);
   };
 
-  const handleDeletePlan = async () => {
-    const confirmDelete = window.confirm(
-      "Bạn chắc chắn muốn xóa kế hoạch này và tất cả các task và ưu tiên liên quan?"
-    );
-    if (confirmDelete) {
-      try {
-        await deletePlan(plan.id);
-        navigate(-1);
-      } catch (error) {
-        console.error("Lỗi khi xóa kế hoạch:", error);
-        alert("Xóa kế hoạch không thành công.");
-      }
-    }
-  };
-
   return (
     <div className="w-full flex justify-between height-container-plans">
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
         <div className="w-full flex items-center justify-between gap-[10px]">
           <div
-            className="square-container-l flex items-center justify-center rounded-[5px] border-1 cursor-pointer text-[1.5rem] bg-bg-light"
-            onClick={() => setIsAddModal((prev) => !prev)}
+            className="w-[50px] h-[50px] min-w-[50px] p-[5px] flex items-center justify-center rounded-[5px] border-1 cursor-pointer text-[1.5rem] bg-bg-light"
+            onClick={openAddTaskMpdal}
           >
             <i className="fa-solid fa-notes-medical"></i>
           </div>
           <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center px-[20px]">
-            <div className="flex w-full items-center px-[10px] justify-end">
-              <div
-                className="square-container-s flex items-center justify-center border-1 rounded-[5px] bg-bg-light text-text-red cursor-pointer"
-                onClick={handleDeletePlan}
-              >
-                <i className="fa-regular fa-square-minus"></i>
-              </div>
-            </div>
+            <div className="flex w-full items-center px-[10px] justify-end"></div>
           </div>
           {isAddModal && (
             <AddTask
               plan={plan}
               autoPlan={autoPlan}
-              onClose={() => setIsAddModal(false)}
+              onClose={closeAddTaskModal}
               priorities={plan.priorities}
               onSuccess={addTaskSuccess}
             />
@@ -201,7 +200,6 @@ const ViewTasks = () => {
           </div>
         </div>
       </div>
-
       <Outlet />
     </div>
   );

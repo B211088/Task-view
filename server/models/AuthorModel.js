@@ -12,7 +12,7 @@ const authorSchema = mongoose.Schema(
       required: true,
     },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
 
 const AuthorModel = mongoose.model("Author", authorSchema);

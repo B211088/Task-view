@@ -39,7 +39,7 @@ export default {
       "cl-border": "#D9D9D9",
       "cl-btn": "",
       "bg-transparent ": "rgba(90, 123, 255, 0.9)",
-      "bg-hover": "#ff9999",
+      "bg-hover": "#dedede",
       unmake: "#ff3b3b",
       make: "#4cd62b",
       making: "#4cd62b",

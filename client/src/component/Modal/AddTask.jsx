@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import useDebounce from "./useDebounce";
 import { addTask } from "../../utils/tasksUtils";
+import NotificationModal from "./NotificationModal";
 
 const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
   const [data, setData] = useState({
@@ -14,17 +15,19 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     planId: plan?.id || "",
     priorityId: "",
   });
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+  const [notifyModal, setNotifyModal] = useState(false);
 
-  console.log(data);
-
-  const formatDate = (date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+  const closeNotifyModal = (e) => {
+    e.stopPropagation();
+    setNotifyModal(false);
   };
 
-  const debouncedData = useDebounce(data, 300);
+  const openNotifyModal = () => {
+    setNotifyModal(true);
+  };
+
+  useDebounce(data, 300);
   const modalRef = useRef(null);
 
   const formatDateToDDMMYYYY = (date) => {
@@ -34,6 +37,12 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!data.title || !data.status) {
+      openNotifyModal();
+      setNotify({ payload: "vui lòng nhập đầy đủ thông tin", type: "warning" });
+      return;
+    }
+
     const planStartDate = new Date(plan.startDate);
     const inputDate = new Date(data.startDay);
 
@@ -104,6 +113,9 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-1 px-[20px]"
       onClick={handleOverlayClick}
     >
+      {notifyModal && (
+        <NotificationModal notify={notify} onCloseNotify={closeNotifyModal} />
+      )}
       <div
         ref={modalRef}
         className="sm:w-[20%] sm:min-w-[380px] min-w-[320px] w-full bg-bg-light z rounded-[5px] px-[20px] py-[20px]"

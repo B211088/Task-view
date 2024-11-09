@@ -22,7 +22,7 @@ const plansSchema = mongoose.Schema(
       required: true,
     },
   },
-  { timeStamps: true }
+  { timestamps: true }
 );
 
 const PlanModel = mongoose.model("Plan", plansSchema);

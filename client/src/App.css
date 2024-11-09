@@ -13,31 +13,27 @@
 }
 
 .square-container-l {
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  max-width: 50px;
+  width: 40px;
+  height: 40px;
   padding: 5px;
   text-align: center;
-  line-height: 45px;
+  line-height: 40px;
 }
 
 .square-container-m {
   width: 34px;
   height: 34px;
-  min-width: 34px;
   padding: 5px;
   text-align: center;
-  line-height: 45px;
+  line-height: 34px;
 }
 
 .square-container-s {
   width: 26px;
   height: 26px;
-  min-width: 26px;
   padding: 2px;
   text-align: center;
-  line-height: 45px;
+  line-height: 26px;
 }
 
 .border-1 {
@@ -158,4 +154,33 @@
     text-align: center;
     line-height: 45px;
   }
+}
+
+.error {
+  color: #ff3636;
+}
+
+.waring {
+  color: #d9c300;
+}
+
+.success {
+  color: #06bf00;
+}
+
+/* Thêm vào file CSS của bạn */
+
+/* Thêm vào file CSS của bạn */
+
+/* Định nghĩa hiệu ứng fade-in cho modal */
+.modal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* Khi modal đã mount, áp dụng opacity 1 và translateY(0) */
+.modal.show {
+  opacity: 1;
+  transform: translateY(0);
 }

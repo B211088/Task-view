@@ -15,6 +15,7 @@ type Plan {
   author: Author,
   tasks: [Task],
   priorities: [Priority]
+  updatedAt: String
 }
 
 type Task {
