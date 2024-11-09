@@ -1,0 +1,161 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.btn {
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.square-container-l {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  max-width: 50px;
+  padding: 5px;
+  text-align: center;
+  line-height: 45px;
+}
+
+.square-container-m {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 5px;
+  text-align: center;
+  line-height: 45px;
+}
+
+.square-container-s {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  padding: 2px;
+  text-align: center;
+  line-height: 45px;
+}
+
+.border-1 {
+  border: 1px solid #d9d9d9;
+}
+
+.full-screen-h {
+  height: calc(100vh - 17px);
+}
+
+.plans-width-screen {
+  width: calc(80% - 30px);
+}
+
+.height-container {
+  height: calc(100vh - 119px);
+}
+
+.height-container-plans {
+  height: calc(100vh - 119px);
+  scroll-behavior: smooth;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.custom-scrollbar-1::-webkit-scrollbar {
+  height: 8px;
+  width: 3px;
+}
+
+.custom-scrollbar-1::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.custom-scrollbar-1::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-1::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.search-input {
+  background-color: transparent !important;
+}
+
+.scrroll-behavior-smooth {
+  scroll-behavior: smooth;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 185px;
+}
+
+.height-container-task-view {
+  height: calc(100vh - 218px);
+  scroll-behavior: smooth;
+}
+
+.height-container-task-list {
+  height: calc(100vh - 217px);
+  scroll-behavior: smooth;
+}
+
+.unmake {
+  border: 1px solid #d9d9d9;
+  color: #ff3636;
+}
+
+.in-progress {
+  border: 1px solid #d9d9d9;
+  color: #d9c300;
+}
+.completed {
+  border: 1px solid #d9d9d9;
+  color: #06bf00;
+}
+
+.border-r {
+  border-right: 1px solid #d9d9d9;
+}
+
+.bg-overlay {
+  background-color: rgba(90, 90, 90, 0.7);
+}
+
+@media screen and (max-width: 768px) {
+}
+
+@media screen and (min-width: 1024px) {
+  .square-container-l {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    max-width: 50px;
+    padding: 0px;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 45px;
+  }
+}
