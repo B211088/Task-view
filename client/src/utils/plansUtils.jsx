@@ -6,6 +6,7 @@ export const plansLoader = async () => {
       id
       name
       startDate
+      endDate
       autoPlan
       updatedAt
 }
@@ -16,12 +17,13 @@ export const plansLoader = async () => {
 };
 
 export const addNewPlan = async (newPlan) => {
-  const query = `mutation Mutation($name: String!, $autoPlan: Boolean!, $startDate: String!, $maxTasksPerDay: Int) {
-    addPlan(name: $name, autoPlan: $autoPlan, startDate: $startDate, maxTasksPerDay: $maxTasksPerDay) {
+  const query = `mutation Mutation($name: String!, $autoPlan: Boolean!, $startDate: String!, $endDate: String! $maxTasksPerDay: Int) {
+    addPlan(name: $name, autoPlan: $autoPlan, startDate: $startDate, endDate: $endDate, maxTasksPerDay: $maxTasksPerDay) {
       id
       name
       autoPlan
       startDate
+      endDate
       maxTasksPerDay
       author {
         uid  

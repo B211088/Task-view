@@ -18,8 +18,11 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     name: "",
     autoPlan: false,
     startDate: "",
+    endDate: "",
     maxTasksPerDay: 1,
   });
+
+  console.log(data);
 
   const handleToggle = () => {
     setIsOnPriority((prev) => {
@@ -46,6 +49,11 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     setNotifyModal(true);
   };
 
+  const formatDateToDDMMYYYY = (date) => {
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
   const handleAddNewPlan = async () => {
     if (!data.name || !data.startDate) {
       openNotifyModal();
@@ -58,8 +66,15 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     }
 
     const formattedStartDate = formatDateToDDMMYYYY(data.startDate);
+    const formattedEndDate = data.endDate
+      ? formatDateToDDMMYYYY(data.endDate)
+      : "";
 
-    const newPlanData = { ...data, startDate: formattedStartDate };
+    const newPlanData = {
+      ...data,
+      startDate: formattedStartDate,
+      endDate: formattedEndDate,
+    };
 
     const { addPlan } = await addNewPlan(newPlanData);
     console.log(addPlan);
@@ -81,12 +96,6 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
 
     onAddPlan();
     onCloseModal();
-  };
-
-  // Hàm format ngày từ yyyy-mm-dd thành dd-mm-yyyy
-  const formatDateToDDMMYYYY = (date) => {
-    const [year, month, day] = date.split("-"); // Tách yyyy-mm-dd thành mảng
-    return `${day}-${month}-${year}`; // Trả về dd-mm-yyyy
   };
 
   const handleToggleMaxTasks = () => {
@@ -165,7 +174,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
 
   return (
     <div
-      className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-10 px-[10px]"
+      className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-30 px-[10px]"
       onClick={handleOverlayClick}
     >
       {notifyModal && (
@@ -196,6 +205,16 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
                 className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
                 type="date"
                 value={data.startDate}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="flex flex-col gap-[5px]">
+              <h3 className="px-[5px] text-[0.75rem]">Ngày kết thúc *</h3>
+              <input
+                name="endDate"
+                className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
+                type="date"
+                value={data.endDate}
                 onChange={handleChange}
               />
             </div>

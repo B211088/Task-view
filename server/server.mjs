@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 import "./firebaseConfig.js";
+import "./helper/cron.js";
 
 import { resolvers } from "./resolvers/index.js";
 import { typeDefs } from "./schemas/index.js";

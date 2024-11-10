@@ -11,6 +11,7 @@ type Plan {
   name: String,
   autoPlan: Boolean,
   startDate: String,
+  endDate: String
   maxTasksPerDay: Int,
   author: Author,
   tasks: [Task],
@@ -39,6 +40,7 @@ type Task {
 type Author {
   uid: String!,
   name: String
+  gmail: String
 }
 
 type Query {
@@ -52,10 +54,10 @@ type Query {
 }
 
 type Mutation {
-  addPlan(name: String!, autoPlan: Boolean!, startDate: String, maxTasksPerDay: Int): Plan,
+  addPlan(name: String!, autoPlan: Boolean!, startDate: String, endDate: String,  maxTasksPerDay: Int): Plan,
   deletePlan(id: String!): Plan,
   addPriority(name: String!, point: Int!, planId: String!): Priority,
-  register(uid: String!, name: String!): Author
+  register(uid: String!, name: String!, gmail: String): Author
  addTask(
     title: String!,
     content: String,

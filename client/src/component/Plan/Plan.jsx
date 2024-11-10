@@ -6,8 +6,6 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
   const [actionModal, setActionModal] = useState(false);
   const actionModalRef = useRef(null);
 
-  console.log(data);
-
   const firstLetter =
     data.name && typeof data.name === "string"
       ? data.name.charAt(0).toUpperCase()
@@ -41,7 +39,7 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center sm:h-full sm:max-h-full max-h-[50px] justify-center sm:justify-start gap-[5px] sm:py-[5px] py-[5px] sm:px-[5px]  cursor-pointer border-1 rounded-[5px] ${
+      className={`flex items-center h-full max-h-full  justify-start gap-[5px] py-[5px]  px-[5px]  cursor-pointer border-1 rounded-[5px] ${
         isActive ? "bg-bg-hover" : "bg-bg-light"
       }`}
       ref={actionModalRef}
@@ -51,7 +49,7 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
           <span>{firstLetter}</span>
         </div>
       </div>
-      <div className="w-full max-w-[90%] max-h-[50px] sm:flex justify-between py-[1px] hidden flex-1 h-[50px] flex-col gap-[5px] px-[0px] ">
+      <div className="w-full max-w-[90%] max-h-[50px] flex justify-between py-[1px] flex-1 h-[50px] flex-col gap-[5px] px-[0px] ">
         <h4
           className="w-full leading-[13px] text-[0.8rem] font-bold font-Nunito text-wrap overflow-hidden text-ellipsis"
           style={{
@@ -63,7 +61,10 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
           {data.name}
         </h4>
         <div className="w-full flex justify-between items-center text-[0.76rem] pr-[5px]">
-          <p>{data.startDate}</p>
+          <div className="flex items-center gap-[5px] text-[0.72rem]">
+            <p>{data.startDate}</p> {data.endDate && <span>-</span>}{" "}
+            <p>{data.endDate ? data.endDate : ""}</p>
+          </div>
           {data.autoPlan && (
             <div className="flex items-center gap-[5px]">
               <p className="leading-[13px]">auto</p>
@@ -73,7 +74,7 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
         </div>
       </div>
       <div
-        className="square-container-s sm:flex hidden items-center justify-center  rounded-[5px] bg-bg-light cursor-pointer relative"
+        className="square-container-s flex  items-center justify-center  rounded-[5px] bg-bg-light cursor-pointer relative"
         onClick={toggleActionModal}
       >
         <i className="fa-solid fa-ellipsis-vertical "></i>

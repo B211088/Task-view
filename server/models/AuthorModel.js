@@ -11,6 +11,9 @@ const authorSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    gmail: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

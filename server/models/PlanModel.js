@@ -14,6 +14,9 @@ const plansSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    endDate: {
+      type: String,
+    },
     maxTasksPerDay: {
       type: Number,
     },

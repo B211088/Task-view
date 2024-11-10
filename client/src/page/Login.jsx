@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { AuthContext } from "../context/AuthProvider";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { graphQLRequest } from "../utils/request";
 
@@ -10,19 +10,25 @@ const Login = () => {
 
   const handleLoginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+
     const {
-      user: { uid, displayName },
+      user: { uid, displayName, email },
     } = await signInWithPopup(auth, provider);
+
+    console.log("Google Provider:", provider);
+    console.log("User Info:", { uid, displayName, email });
+
     const { data } = await graphQLRequest({
-      query: `mutation register($uid: String!, $name:String!) {
-      register(uid: $uid, name: $name) {
-        uid
-        name
-      }}`,
-      variables: { uid, name: displayName },
+      query: `mutation register($uid: String!, $name: String!, $gmail: String!) {
+        register(uid: $uid, name: $name, gmail: $gmail) {
+          uid
+          name
+          gmail
+        }}`,
+      variables: { uid, name: displayName, gmail: email },
     });
 
-    console.log("register", { data });
+    console.log("register response:", { data });
   };
 
   if (localStorage.getItem("accessToken")) {

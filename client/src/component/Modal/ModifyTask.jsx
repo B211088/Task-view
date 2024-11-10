@@ -13,11 +13,18 @@ const ModifyTask = ({
 }) => {
   const [data, setData] = useState({
     ...task,
-    priorityId: task.priorityId || "",
+    priorityId: task.priority ? task.priority.id : "",
+    estimatedCompletionTime: task.estimatedCompletionTime,
+    startDay: task.startDay ? task.startDay : "",
   });
-
+  console.log("taskModify", data);
   const [status, setStatus] = useState("");
+  const [isTimeSchedule, setIsTimeSchedule] = useState(false);
+  const [isStartDay, setIsStartDay] = useState(false);
   const modalRef = useRef();
+  const prevStartDayRef = useRef(data.startDay);
+
+  console.log("taskbefore: ", task);
   const navigate = useNavigate();
   useDebounce(data, 300);
 
@@ -31,17 +38,50 @@ const ModifyTask = ({
     }
   }, [task]);
 
+  const handleToggleTimeSchedule = () => {
+    setIsTimeSchedule(!isTimeSchedule);
+  };
+
+  useEffect(() => {
+    if (!isStartDay) {
+      setData({
+        ...data,
+        startDay: "",
+      });
+    }
+  }, [isStartDay]);
+
+  useEffect(() => {
+    if (!isTimeSchedule) {
+      setData((prevData) => ({
+        ...prevData,
+        timeSchedule: task.timeSchedule,
+      }));
+    }
+
+    const planStartDate = new Date(plan.startDate);
+    const taskStartDate = task.startDay ? new Date(task.startDay) : null;
+
+    setData((prevData) => ({
+      ...prevData,
+      title: task.title || prevData.title,
+      content: task.content || prevData.content,
+      startDay:
+        taskStartDate && taskStartDate >= planStartDate ? data.startDay : "",
+      priorityId: task.priority ? task.priority.id : prevData.priorityId,
+      estimatedCompletionTime:
+        task.estimatedCompletionTime || prevData.estimatedCompletionTime,
+    }));
+  }, [task, plan, isTimeSchedule]);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-
     if (isNaN(date)) {
       return null;
     }
-
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
-
     return `${day}-${month}-${year}`;
   };
 
@@ -56,14 +96,21 @@ const ModifyTask = ({
       return;
     }
 
-    const formattedStartDay = data.startDay
-      ? formatDate(data.startDay)
-      : data.startDay;
+    const formattedStartDay =
+      data.startDay !== prevStartDayRef.current
+        ? formatDate(data.startDay)
+        : task.startDay;
 
     const updateData = {
       ...data,
-      startDay: formattedStartDay || task.startDay,
+      startDay: formattedStartDay,
+      estimatedCompletionTime: parseInt(data.estimatedCompletionTime, 10),
     };
+
+    console.log("updateData", updateData);
+    console.log("task.startDay", task.startDay);
+
+    console.log("formattedStartDay", formattedStartDay);
 
     await updateTask(updateData);
     onClose();
@@ -74,7 +121,7 @@ const ModifyTask = ({
     const { name, value } = e.target;
     setData((prevData) => ({
       ...prevData,
-      [name]: value || task[name],
+      [name]: value || prevData[name],
     }));
   };
 
@@ -84,6 +131,10 @@ const ModifyTask = ({
 
   const handleModalClick = (e) => {
     e.stopPropagation();
+  };
+
+  const handleToggleStartDay = () => {
+    setIsStartDay(!isStartDay);
   };
 
   return (
@@ -117,14 +168,82 @@ const ModifyTask = ({
             onChange={handleChange}
             required
           />
-          {!autoPlan && (
+          {autoPlan && (
+            <input
+              name="estimatedCompletionTime"
+              className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
+              type="number"
+              placeholder="số ngày cần có để hoàn thành"
+              min="1"
+              value={data.estimatedCompletionTime}
+              onChange={handleChange}
+              required
+            />
+          )}
+          {plan.autoPlan === true && (
+            <div className="flex items-center gap-[10px]">
+              <label className="relative w-[40px] inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isStartDay}
+                  onChange={handleToggleStartDay}
+                  className="sr-only peer"
+                />
+                <div
+                  className={`w-[40px] flex items-center h-[20px] bg-color-dark-800 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 
+                  transition-all duration-300 ${
+                    isStartDay ? "bg-text-dark-700" : "bg-text-dark-100"
+                  }`}
+                ></div>
+                <span
+                  className={`absolute top-[10%] left-1 h-[16px] w-[16px] bg-text-light rounded-full transition-transform duration-300 transform 
+                  ${isStartDay ? "translate-x-[15px]" : ""}`}
+                ></span>
+              </label>
+              <h3 className="px-[5px] text-[0.75rem]">Ngày bắt đầu</h3>
+            </div>
+          )}
+
+          {(!plan.autoPlan || isStartDay) && (
             <div className="flex flex-col gap-[5px]">
-              <h3 className="px-[5px] text-[0.75rem]">Ngày bắt đầu *</h3>
               <input
                 name="startDay"
-                className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[5px] rounded-[5px]"
+                className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
                 type="date"
-                value={data.startDay || ""}
+                value={data.startDay}
+                onChange={handleChange}
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-[10px]">
+            <label className="relative w-[40px] inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isTimeSchedule}
+                onChange={handleToggleTimeSchedule}
+                className="sr-only peer"
+              />
+              <div
+                className={`w-[40px] flex items-center h-[20px] bg-color-dark-800 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 
+                  transition-all duration-300 ${
+                    isTimeSchedule ? "bg-text-dark-700" : "bg-text-dark-100"
+                  }`}
+              ></div>
+              <span
+                className={`absolute top-[10%] left-1 h-[16px] w-[16px] bg-text-light rounded-full transition-transform duration-300 transform 
+                  ${isTimeSchedule ? "translate-x-[15px]" : ""}`}
+              ></span>
+            </label>
+            <h3 className="px-[5px] text-[0.75rem]">Giờ bắt đầu làm việc</h3>
+          </div>
+
+          {isTimeSchedule && (
+            <div className="flex flex-col gap-[5px]">
+              <input
+                name="timeSchedule"
+                className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
+                type="time"
+                value={data.timeSchedule}
                 onChange={handleChange}
               />
             </div>
@@ -137,7 +256,9 @@ const ModifyTask = ({
               value={data.priorityId}
               required
             >
-              <option value={task.priority.id}>{task.priority.name}</option>
+              <option value={task.priority ? task.priority.id : ""}>
+                {task.priority ? task.priority.name : "Chọn ưu tiên"}
+              </option>
               {priorities.map((priority) => (
                 <option key={priority.id} value={priority.id}>
                   {priority.name}

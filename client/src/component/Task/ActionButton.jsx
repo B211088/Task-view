@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const ActionButton = ({ isModify, isDelete, task }) => {
@@ -12,7 +13,7 @@ const ActionButton = ({ isModify, isDelete, task }) => {
       <div
         className="square-container-s flex items-center justify-center border-1 rounded-[5px] cursor-pointer hover:bg-color-dark-800
       "
-        onClick={isDelete}
+        onClick={() => isDelete(task.id)}
       >
         <i className="fa-solid fa-trash"></i>
       </div>

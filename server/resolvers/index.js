@@ -1,9 +1,12 @@
+import sendExpirationEmail from "../helper/sendMail.js";
 import {
   PlanModel,
   TaskModel,
   AuthorModel,
   PriorityModel,
 } from "../models/index.js";
+
+import moment from "moment";
 
 export const resolvers = {
   Query: {
@@ -211,4 +214,24 @@ export const resolvers = {
       }
     },
   },
+};
+
+export const checkEndDateAndSendEmail = async () => {
+  const now = moment();
+  const tomorrow = now.clone().add(1, "days");
+
+  const plans = await PlanModel.find();
+  console.log(plans);
+
+  const emailPromises = plans.map(async (plan) => {
+    const endDate = moment(plan.endDate, "DD-MM-YYYY");
+
+    // Kiểm tra nếu endDate cách ngày hiện tại đúng 1 ngày
+    if (endDate.isSame(tomorrow, "day")) {
+      console.log(`Gửi email cho người dùng ${plan.authorId}`);
+      await sendExpirationEmail(plan.authorId, plan.endDate, plan.name);
+    }
+  });
+
+  await Promise.all(emailPromises);
 };

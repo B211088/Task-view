@@ -5,11 +5,10 @@ const TaskDetail = ({ onClose }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState({});
   const { task } = useLoaderData();
-  console.log("TaskDetail", task);
 
   useEffect(() => {
     if (task.priority === null) {
-      task.priority = "Normal";
+      task.priority = "";
       setData((prevData) => ({
         ...prevData,
         priority: task.priority,
@@ -29,14 +28,11 @@ const TaskDetail = ({ onClose }) => {
 
   const body = (
     <div className="sm:w-full sm:h-full h-[500px] w-[78%] hidden sm:flex  flex-col gap-[10px] border-1 rounded-[5px] bg-bg-light p-[10px]">
-      <div className="w-full h-[34px] flex items-center justify-between font-Nunito font-bold text-[1.2rem]">
-        <h4>{task.title}</h4>
-        <div className="square-container-s flex sm:hidden items-center justify-center border-1 rounded-[5px] cursor-pointer">
-          <i className="fa-solid fa-xmark"></i>
-        </div>
+      <div className="w-full flex items-center justify-between font-Nunito font-bold text-[1.2rem] py-[10px]">
+        <h4 className="">{task.title}</h4>
       </div>
       <div
-        className={`w-[120px] flex items-center justify-center border-1 rounded-[8px] font-bold text-[0.8rem] py-[2px] ${
+        className={`w-[120px] flex items-center justify-center border-1 rounded-[8px] font-bold text-[0.8rem] py-[4px] mb-[10px] ${
           task.status === "unmake"
             ? "unmake"
             : task.status === "in-progress"
@@ -63,17 +59,19 @@ const TaskDetail = ({ onClose }) => {
           </div>
         )}
 
-        {task.priority && (
+        {task.priority && task.priority != "" && (
           <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
             <span>Độ ưu tiên:</span>
             <span>{task.priority.name === null ? "" : task.priority.name}</span>
           </div>
         )}
 
-        <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-          <span>Số ngày cần để hoàn thành:</span>
-          <span>{`${task.estimatedCompletionTime} Ngày`}</span>
-        </div>
+        {task.estimatedCompletionTime > 1 && (
+          <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
+            <span>Số ngày cần để hoàn thành:</span>
+            <span>{`${task.estimatedCompletionTime} Ngày`}</span>
+          </div>
+        )}
         {/* {task.prerequisites != [] && (
           <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
             <span>Công việc tiên quyết:</span>
@@ -84,8 +82,8 @@ const TaskDetail = ({ onClose }) => {
         )} */}
 
         <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-          <span>Đã làm được:</span>
-          <span>{task.timeSchedule}</span>
+          <span>Bắt đầu lúc: </span>
+          <span>{task.timeSchedule ? task.timeSchedule : "00:00"}</span>
         </div>
       </div>
     </div>
@@ -93,18 +91,21 @@ const TaskDetail = ({ onClose }) => {
 
   return (
     <div
-      className={`sm:w-[22%] w-full flex justify-center items-center ${
+      className={`sm:w-[22%] height-container-taskdetails w-full flex justify-center items-center ${
         isMobile
           ? "sm:static fixed hidden top-0 bottom-0 right-0 left-0 bg-overlay"
           : ""
       }`}
     >
       {isMobile ? (
-        <div id="mobile" className="w-full flex justify-center items-center">
+        <div
+          id="mobile"
+          className="w-full h-full flex justify-center items-center"
+        >
           {body}
         </div>
       ) : (
-        <div id="pc" className="w-full flex h-full">
+        <div id="pc" className="w-full h-full flex h-full">
           {body}
         </div>
       )}

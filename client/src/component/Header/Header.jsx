@@ -2,7 +2,7 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import UserMenu from "./userMenu";
 
-const Header = () => {
+const Header = ({ openSideBar }) => {
   const {
     user: { displayName, photoURL, auth },
   } = useContext(AuthContext);
@@ -36,7 +36,10 @@ const Header = () => {
 
   return (
     <div className="w-full h-[68px] flex items-center justify-between bg-bg-header px-[10px]">
-      <div className="flex sm:hidden square-container-m border-1 rounded-[5px] bg-bg-light items-center justify-center cursor-pointer font-bold text-[1.2rem]">
+      <div
+        className="flex sm:hidden square-container-l  rounded-[5px] items-center justify-center cursor-pointer font-bold text-[1.5rem] text-text-light "
+        onClick={openSideBar}
+      >
         <i className="fa-solid fa-bars"></i>
       </div>
       <div className="text-text-light w-2/12 flex items-center text-[1.2rem] uppercase font-Nunito font-bold">

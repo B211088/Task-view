@@ -38,46 +38,39 @@ const ViewTasks = () => {
     const tasksByDay = {};
     const scheduledTasksMap = new Map();
 
-    if (tasks.priorities) {
-      tasks.sort((a, b) => (b.priority.point ?? 0) - (a.priority.point ?? 0));
-    }
+    tasks.sort((a, b) => (b.priority?.point ?? 0) - (a.priority?.point ?? 0));
 
     tasks.forEach((task) => {
-      let taskStartDate = startDate;
+      let taskStartDate = task.startDay || startDate;
 
-      if (task.startDay) {
-        taskStartDate = task.startDay;
-      } else {
-        if (task.prerequisites.length > 0) {
-          const prerequisiteCompletionDates = task.prerequisites
-            .map((prereq) => scheduledTasksMap.get(prereq)?.scheduledDay)
-            .filter(Boolean);
+      if (!task.startDay && task.prerequisites.length > 0) {
+        const prerequisiteCompletionDates = task.prerequisites
+          .map((prereq) => scheduledTasksMap.get(prereq)?.scheduledDay)
+          .filter(Boolean);
 
-          if (
-            prerequisiteCompletionDates.length === task.prerequisites.length
-          ) {
-            const latestPrerequisiteCompletionDate = new Date(
-              Math.max(
-                ...prerequisiteCompletionDates.map((date) => {
-                  const [day, month, year] = date.split("-").map(Number);
-                  return new Date(year, month - 1, day).getTime();
-                })
-              )
-            );
-            latestPrerequisiteCompletionDate.setDate(
-              latestPrerequisiteCompletionDate.getDate() + 1
-            );
-            const dd = String(
-              latestPrerequisiteCompletionDate.getDate()
-            ).padStart(2, "0");
-            const mm = String(
-              latestPrerequisiteCompletionDate.getMonth() + 1
-            ).padStart(2, "0");
-            const yyyy = latestPrerequisiteCompletionDate.getFullYear();
-            taskStartDate = `${dd}-${mm}-${yyyy}`;
-          } else {
-            return;
-          }
+        if (prerequisiteCompletionDates.length === task.prerequisites.length) {
+          const latestPrerequisiteCompletionDate = new Date(
+            Math.max(
+              ...prerequisiteCompletionDates.map((date) => {
+                const [day, month, year] = date.split("-").map(Number);
+                return new Date(year, month - 1, day).getTime();
+              })
+            )
+          );
+          latestPrerequisiteCompletionDate.setDate(
+            latestPrerequisiteCompletionDate.getDate() + 1
+          );
+
+          const dd = String(
+            latestPrerequisiteCompletionDate.getDate()
+          ).padStart(2, "0");
+          const mm = String(
+            latestPrerequisiteCompletionDate.getMonth() + 1
+          ).padStart(2, "0");
+          const yyyy = latestPrerequisiteCompletionDate.getFullYear();
+          taskStartDate = `${dd}-${mm}-${yyyy}`;
+        } else {
+          return;
         }
       }
 
@@ -102,7 +95,20 @@ const ViewTasks = () => {
       }
     });
 
-    return tasksByDay;
+    const sortedTaskDays = Object.keys(tasksByDay).sort((a, b) => {
+      const [dayA, monthA, yearA] = a.split("-").map(Number);
+      const [dayB, monthB, yearB] = b.split("-").map(Number);
+      const dateA = new Date(yearA, monthA - 1, dayA);
+      const dateB = new Date(yearB, monthB - 1, dayB);
+      return dateA - dateB;
+    });
+
+    const sortedTasksByDay = {};
+    sortedTaskDays.forEach((date) => {
+      sortedTasksByDay[date] = tasksByDay[date];
+    });
+
+    return sortedTasksByDay;
   };
 
   const sortTasksByStartDay = (tasks) => {
@@ -160,7 +166,7 @@ const ViewTasks = () => {
   };
 
   return (
-    <div className="w-full flex justify-between height-container-plans">
+    <div className="w-full flex justify-between height-container-taskview  ">
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
         <div className="w-full flex items-center justify-between gap-[10px]">
           <div
@@ -170,7 +176,9 @@ const ViewTasks = () => {
             <i className="fa-solid fa-notes-medical"></i>
           </div>
           <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center px-[20px]">
-            <div className="flex w-full items-center px-[10px] justify-end"></div>
+            <div className="flex w-full items-center px-[10px] font-Nunito font-bold">
+              {plan.name}
+            </div>
           </div>
           {isAddModal && (
             <AddTask
@@ -183,7 +191,7 @@ const ViewTasks = () => {
           )}
         </div>
 
-        <div className="w-full height-container-plans flex flex-col gap-2 border-1 rounded bg-bg-light flex-1">
+        <div className="w-full height-container-taskdetails flex flex-col gap-2 border-1 rounded bg-bg-light flex-1">
           <div className="flex w-full overflow-auto custom-scrollbar-1">
             {Object.keys(scheduledTasks).map((day) => {
               return (

@@ -6,7 +6,7 @@ import Plan from "../Plan/Plan";
 import ConfirmModal from "../Modal/ConfirmModal";
 import { deletePlan } from "../../utils/plansUtils";
 
-const Sidebar = ({ plans }) => {
+const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [isAddPlanModalOpen, setIsAddPlanModalOpen] = useState(false);
@@ -20,7 +20,6 @@ const Sidebar = ({ plans }) => {
   const [planId, setPlanId] = useState("");
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
-  console.log(plans);
 
   const closeConfirmModal = () => {
     setConfirmModal(false);
@@ -112,11 +111,12 @@ const Sidebar = ({ plans }) => {
 
   return (
     <div
-      className="sm:w-full w-[62px] min-w-[62px] height-container flex flex-col gap-[10px] sm:px-[8px] sm:py-[10px] py-[15px] px-[5px] border-1 shadow rounded-[5px] bg-bg-light"
-      ref={filterRef}
+      className="w-[100%]  height-container flex flex-col gap-[10px] sm:px-[8px] sm:py-[10px] py-[15px] px-[5px] border-1 shadow rounded-[5px] bg-bg-light "
+      onClick={handleModalClick}
+      ref={refSideBar}
     >
-      <div className="flex items-center gap-[10px] sm:justify-between justify-center">
-        <h3 className="text-[0.8rem] font-Montserrat font-bold hidden sm:block">
+      <div className="flex items-center gap-[10px] justify-between ">
+        <h3 className="text-[0.8rem] font-Montserrat font-bold sm:block">
           Kế hoạch của bạn
         </h3>
         <div>
@@ -134,9 +134,9 @@ const Sidebar = ({ plans }) => {
           )}
         </div>
       </div>
-      <div className="flex items-center justify-between gap-[15px] sm:flex-row flex-col">
-        <div className="flex sm:w-full items-center justify-between w-[34px] h-[34px] text-[13px] rounded-[5px] bg-color-dark-900 cursor-pointer sm:p-[5px] p-[0px] sm:pr-[0px]">
-          <div className="hidden sm:flex items-center sm:h-full h-[34px] rounded-[5px] sm:bg-color-dark-900 bg-bg-light sm:p-[0px] p-[5px] sm:border-none">
+      <div className="flex items-center justify-between gap-[15px] flex-row ">
+        <div className="flex w-full items-center justify-between ] h-[34px] text-[13px] rounded-[5px] bg-color-dark-900 cursor-pointer sm:p-[5px] p-[0px] sm:pr-[0px]">
+          <div className=" flex items-center sm:h-full h-[34px] rounded-[5px] bg-color-dark-900  sp-[0px] p-[5px] sm:border-none">
             <input
               className="outline-none w-full rounded-[5px] px-[5px] search-input h-full"
               type="text"
@@ -157,7 +157,10 @@ const Sidebar = ({ plans }) => {
             <i className="fa-solid fa-filter"></i>
           </div>
           {isFilterVisible && (
-            <div className="absolute w-[120px] sm:top-[110%] top-[-4%] sm:left-[-250%] left-[151%] font-Nunito z-20 font-bold bg-bg-light border-1 border-cl-border rounded-[5px] text-[0.9rem] text-text-dark-700">
+            <div
+              className="absolute w-[120px] top-[110%]  left-[-250%] font-Nunito z-20 font-bold bg-bg-light border-1 border-cl-border rounded-[5px] text-[0.9rem] text-text-dark-700"
+              ref={filterRef}
+            >
               <div
                 className="w-full h-[34px] flex items-center justify-center text-center px-[10px] hover:bg-color-dark-900 cursor-pointer"
                 onClick={() => handleSortOrderChange("newest")}
@@ -195,7 +198,6 @@ const Sidebar = ({ plans }) => {
             onClose={closeConfirmModal}
             onConfirm={onConfirm}
             notify={notify}
-            planId={planId}
           />
         )}
       </div>
