@@ -261,13 +261,16 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
                 onChange={handleChange}
               >
                 <option value="">Độ ưu tiên</option>
-                {priorities.map((priority) => (
-                  <option key={priority.id} value={priority.id}>
-                    {priority.name}
-                  </option>
-                ))}
+                {priorities
+                  .sort((a, b) => b.point - a.point)
+                  .map((priority) => (
+                    <option key={priority.id} value={priority.id}>
+                      {priority.name}
+                    </option>
+                  ))}
               </select>
             )}
+
             <select
               name="status"
               className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[5px] rounded-[5px]"

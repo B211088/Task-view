@@ -8,6 +8,7 @@ export const tasksLoader = async ({ params: { planId } }) => {
       maxTasksPerDay
       autoPlan
       startDate
+      endDate
       author {
         uid  
         name

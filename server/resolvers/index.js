@@ -145,6 +145,33 @@ export const resolvers = {
       await newPlan.save();
       return newPlan;
     },
+
+    modifyPlan: async (
+      parent,
+      { id, name, autoPlan, startDate, endDate, maxTasksPerDay },
+      context
+    ) => {
+      try {
+        const plan = await PlanModel.findById(id);
+
+        if (!plan) {
+          throw new Error(`Plan with ID ${id} not found`);
+        }
+
+        plan.name = name || plan.name;
+        plan.autoPlan = autoPlan;
+        plan.startDate = startDate || plan.startDate;
+        plan.endDate = endDate || plan.endDate;
+        plan.maxTasksPerDay = maxTasksPerDay || plan.maxTasksPerDay;
+
+        const updatedPlan = await plan.save();
+
+        return updatedPlan;
+      } catch (error) {
+        throw new Error("Error modifying plan: " + error.message);
+      }
+    },
+
     deletePlan: async (parent, { id }, context) => {
       try {
         const foundPlan = await PlanModel.findById(id);
@@ -153,7 +180,6 @@ export const resolvers = {
         }
 
         await TaskModel.deleteMany({ planId: id });
-
         await PriorityModel.deleteMany({ planId: id });
 
         await PlanModel.findByIdAndDelete(id);
@@ -169,6 +195,55 @@ export const resolvers = {
       await newPriority.save();
       return newPriority;
     },
+
+    modifyPriority: async (parent, { priorities }) => {
+      try {
+        const updatedPriorities = [];
+
+        for (const priorityData of priorities) {
+          const updatedPriority = await PriorityModel.findByIdAndUpdate(
+            priorityData.id,
+            { name: priorityData.name, point: priorityData.point },
+            { new: true }
+          );
+
+          if (!updatedPriority) {
+            throw new Error(`Priority with id ${priorityData.id} not found`);
+          }
+
+          updatedPriorities.push(updatedPriority);
+        }
+
+        return updatedPriorities;
+      } catch (error) {
+        throw new Error("Error modifying priorities: " + error.message);
+      }
+    },
+
+    deletePriority: async (parent, { ids }) => {
+      try {
+        const deletedPriorities = await PriorityModel.find({
+          _id: { $in: ids },
+        });
+
+        if (deletedPriorities.length === 0) {
+          throw new Error("No priorities found with the given IDs");
+        }
+
+        const result = await PriorityModel.deleteMany({
+          _id: { $in: ids },
+        });
+
+        if (result.deletedCount === 0) {
+          throw new Error("No priorities were deleted");
+        }
+
+        return deletedPriorities;
+      } catch (error) {
+        throw new Error("Error deleting priorities: " + error.message);
+      }
+    },
+
     register: async (parent, args) => {
       const newUser = new AuthorModel(args);
       const foundUser = await AuthorModel.findOne({ uid: args.uid });
@@ -179,11 +254,13 @@ export const resolvers = {
       }
       return foundUser;
     },
+
     addTask: async (parent, args) => {
       const newTask = new TaskModel(args);
       await newTask.save();
       return newTask;
     },
+
     updateTask: async (parent, { id, ...taskData }, context) => {
       try {
         const updatedTask = await TaskModel.findByIdAndUpdate(

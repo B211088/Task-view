@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import AddTask from "../Modal/AddTask";
 import ListTask from "./ListTask";
+import ModifyPlan from "../Modal/ModifyPlan";
 
 const ViewTasks = () => {
   const { plan } = useLoaderData();
@@ -14,6 +15,8 @@ const ViewTasks = () => {
   const [isAddModal, setIsAddModal] = useState(false);
   const [scheduledTasks, setScheduledTasks] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isModify, setIsModify] = useState(false);
+  const [planData, setPlanData] = useState(plan);
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
 
@@ -165,6 +168,14 @@ const ViewTasks = () => {
     setScheduledTasks(scheduled);
   };
 
+  const openModifyModal = () => {
+    setIsModify(true);
+  };
+
+  const closeModifyModal = () => {
+    setIsModify(false);
+  };
+
   return (
     <div className="w-full flex justify-between height-container-taskview  ">
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
@@ -176,8 +187,14 @@ const ViewTasks = () => {
             <i className="fa-solid fa-notes-medical"></i>
           </div>
           <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center px-[20px]">
-            <div className="flex w-full items-center px-[10px] font-Nunito font-bold">
-              {plan.name}
+            <div className="flex w-full items-center justify-between font-Nunito font-bold">
+              <h1>{plan.name}</h1>
+              <div
+                className="square-container-s flex items-center justify-center border-1 rounded-[5px] cursor-pointer text-text-dark-600 hover:text-text-dark-1000"
+                onClick={openModifyModal}
+              >
+                <i className="fa-solid fa-gear"></i>
+              </div>
             </div>
           </div>
           {isAddModal && (
@@ -207,7 +224,19 @@ const ViewTasks = () => {
             })}
           </div>
         </div>
+        {
+          isModify && (
+            <ModifyPlan
+              plan={planData}
+              onClose={() => setIsModify(false)}
+              onCloseModal={closeModifyModal}
+            />
+          )
+
+          // Add your code for ModifyPlan component here
+        }
       </div>
+
       <Outlet />
     </div>
   );

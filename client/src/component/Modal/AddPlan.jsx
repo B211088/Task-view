@@ -39,6 +39,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
 
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [notifyModal, setNotifyModal] = useState(false);
+  const modalRef = useRef(null);
 
   const closeNotifyModal = (e) => {
     e.stopPropagation();
@@ -120,8 +121,6 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
   }, [isOnPriority, isOnMaxTasks]);
 
   useDebounce(data, 300);
-
-  const modalRef = useRef(null);
 
   const addPriority = () => {
     setPriority((prevPriorities) => [

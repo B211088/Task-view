@@ -25,6 +25,8 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
     setConfirmModal(false);
   };
 
+  console.log(plansData);
+
   const openConfirmModal = (planId) => {
     setNotify({
       payload: "Bạn có chắc chắn muốn xóa kế hoạch này?",
@@ -76,8 +78,11 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
 
   const sortPlans = () => {
     const sortedPlans = plansData
-      .filter((plan) =>
-        plan.name.toLowerCase().includes(searchQuery.toLowerCase())
+      .filter(
+        (plan) =>
+          plan &&
+          plan.name &&
+          plan.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .sort((a, b) => {
         if (sortOrder === "newest") {

@@ -50,27 +50,31 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
         </div>
       </div>
       <div className="w-full max-w-[90%] max-h-[50px] flex justify-between py-[1px] flex-1 h-[50px] flex-col gap-[5px] px-[0px] ">
-        <h4
-          className="w-full leading-[13px] text-[0.8rem] font-bold font-Nunito text-wrap overflow-hidden text-ellipsis"
-          style={{
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 2,
-          }}
-        >
-          {data.name}
-        </h4>
+        <div className="flex items-center">
+          <h4
+            className="w-full leading-[13px] text-[0.8rem] font-bold font-Nunito text-wrap overflow-hidden text-ellipsis"
+            style={{
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            }}
+          >
+            {data.name}
+          </h4>
+
+          {data.autoPlan && (
+            <div className="flex items-center gap-[5px] text-[0.76rem] pr-[5px]">
+              <p className="leading-[13px]">auto</p>
+              <i className="fa-solid fa-bolt"></i>
+            </div>
+          )}
+        </div>
+
         <div className="w-full flex justify-between items-center text-[0.76rem] pr-[5px]">
           <div className="flex items-center gap-[5px] text-[0.72rem]">
             <p>{data.startDate}</p> {data.endDate && <span>-</span>}{" "}
             <p>{data.endDate ? data.endDate : ""}</p>
           </div>
-          {data.autoPlan && (
-            <div className="flex items-center gap-[5px]">
-              <p className="leading-[13px]">auto</p>
-              <i className="fa-solid fa-bolt"></i>
-            </div>
-          )}
         </div>
       </div>
       <div
@@ -86,9 +90,6 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
                 onClick={() => openConfirmModal(data.id)}
               >
                 Xóa
-              </li>
-              <li className="w-full h-[26px] px-[20px] hover:bg-color-dark-800">
-                Sửa
               </li>
             </ul>
           </div>

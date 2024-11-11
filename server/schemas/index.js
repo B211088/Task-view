@@ -11,11 +11,11 @@ type Plan {
   name: String,
   autoPlan: Boolean,
   startDate: String,
-  endDate: String
+  endDate: String,
   maxTasksPerDay: Int,
   author: Author,
   tasks: [Task],
-  priorities: [Priority]
+  priorities: [Priority],
   updatedAt: String
 }
 
@@ -34,12 +34,9 @@ type Task {
   planId: String!
 }
 
-
-
-
 type Author {
   uid: String!,
-  name: String
+  name: String,
   gmail: String
 }
 
@@ -54,11 +51,21 @@ type Query {
 }
 
 type Mutation {
-  addPlan(name: String!, autoPlan: Boolean!, startDate: String, endDate: String,  maxTasksPerDay: Int): Plan,
+  addPlan(name: String!, autoPlan: Boolean!, startDate: String!, endDate: String, maxTasksPerDay: Int): Plan,
+  
+  modifyPlan(id: String!, name: String!, autoPlan: Boolean!, startDate: String!, endDate: String, maxTasksPerDay: Int): Plan,
+  
   deletePlan(id: String!): Plan,
+
   addPriority(name: String!, point: Int!, planId: String!): Priority,
-  register(uid: String!, name: String!, gmail: String): Author
- addTask(
+
+  modifyPriority(priorities: [ModifyPriorityInput!]!): [Priority]
+  
+  deletePriority(ids: [String!]!): [Priority]
+  
+  register(uid: String!, name: String!, gmail: String): Author,
+ 
+  addTask(
     title: String!,
     content: String,
     status: String!,
@@ -68,8 +75,9 @@ type Mutation {
     priorityId: String,
     prerequisites: [String],
     estimatedCompletionTime: Int
-  ): Task
-   updateTask(
+  ): Task,
+  
+  updateTask(
     id: String!,             
     title: String!,
     content: String,
@@ -80,6 +88,13 @@ type Mutation {
     prerequisites: [String],
     estimatedCompletionTime: Int
   ): Task,
+
   deleteTask(taskId: String!): Task
+}
+
+input ModifyPriorityInput {
+  id: String!
+  name: String
+  point: Int
 }
 `;
