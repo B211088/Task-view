@@ -6,7 +6,8 @@ const ConfirmModal = ({ notify, onClose, onConfirm }) => {
     e.stopPropagation();
   };
 
-  const handleOverlayClick = () => {
+  const handleOverlayClick = (e) => {
+    e.stopPropagation();
     onClose();
   };
 
@@ -17,7 +18,7 @@ const ConfirmModal = ({ notify, onClose, onConfirm }) => {
     >
       <div
         ref={modalRef}
-        className="sm:w-[22%] h-[200px]  sm:min-w-[360px] min-w-[320px] w-full z flex items-center justify-between mt-[40px] bg-bg-light z rounded-[5px] px-[10px] py-[10px]"
+        className="sm:w-[22%] h-[180px]  sm:min-w-[360px] min-w-[320px] w-full z flex items-center justify-between mt-[40px] bg-bg-light z rounded-[5px] px-[10px] py-[10px]"
         onClick={handleModalClick}
       >
         <div className="w-full  flex flex-col items-center  justify-between ">
@@ -31,20 +32,20 @@ const ConfirmModal = ({ notify, onClose, onConfirm }) => {
             )}
           </div>
 
-          <div className="w-full min-h-[80px]  px-[5px] flex items-center justify-center text-center py-[10px] font-bold">
+          <div className="w-full min-h-[100px]  px-[5px] flex items-center justify-center text-center py-[10px] font-bold">
             <h1 className="w-full break-words font-Nunito text-[1rem]">
               {notify.payload}
             </h1>
           </div>
-          <div className="w-full flex items-center justify-center gap-[20px]">
+          <div className="w-full flex items-center justify-center gap-[20px] text-[0.9rem]">
             <button
-              className="border-1 w-[50%] rounded-[5px] px-[14px] py-[2px] border-1 text-text-dark-800 font-Nunito "
+              className="border-1 w-[50%] rounded-[5px] px-[14px] py-[5px] border-1 text-text-dark-800 font-Nunito "
               onClick={onClose}
             >
               Đóng
             </button>
             <button
-              className="border-1 w-[50%] rounded-[5px] px-[14px] py-[2px] bg-bg-btn-add text-text-light font-Nunito "
+              className=" w-[50%] rounded-[5px] px-[14px] py-[6px] bg-bg-btn-add text-text-light font-Nunito "
               onClick={onConfirm}
             >
               Xác nhận

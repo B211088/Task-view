@@ -227,7 +227,7 @@ const ViewTasks = () => {
         {
           isModify && (
             <ModifyPlan
-              plan={planData}
+              plan={plan}
               onClose={() => setIsModify(false)}
               onCloseModal={closeModifyModal}
             />

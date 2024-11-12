@@ -27,6 +27,5 @@ export const taskLoader = async ({ params: { taskId } }) => {
   if (!data || !data.task) {
     throw new Error("Task not found or error in fetching task data");
   }
-  console.log(data);
   return data;
 };

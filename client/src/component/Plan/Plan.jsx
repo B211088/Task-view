@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
   const [data, setData] = useState(plan);
@@ -78,22 +77,15 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
         </div>
       </div>
       <div
-        className="square-container-s flex  items-center justify-center  rounded-[5px] bg-bg-light cursor-pointer relative"
+        className="square-container-s flex  items-center justify-center border-1 rounded-[5px] bg-bg-light cursor-pointer relative"
         onClick={toggleActionModal}
       >
-        <i className="fa-solid fa-ellipsis-vertical "></i>
-        {actionModal && (
-          <div className="absolute w-[400%] bg-bg-light border-1 top-[100%] right-[0%] rounded-[5px] z-10">
-            <ul className="w-full text-[0.9rem] font-Nunito  ">
-              <li
-                className="w-full h-[26px] px-[20px] hover:bg-color-dark-800"
-                onClick={() => openConfirmModal(data.id)}
-              >
-                Xóa
-              </li>
-            </ul>
-          </div>
-        )}
+        <div
+          className="w-full h-full flex  items-center justify-center"
+          onClick={() => openConfirmModal(data.id)}
+        >
+          <i className="fa-solid fa-trash-can-arrow-up"></i>
+        </div>
       </div>
     </div>
   );

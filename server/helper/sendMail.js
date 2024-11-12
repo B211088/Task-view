@@ -28,7 +28,6 @@ const sendExpirationEmail = async (uid, endDate, payload) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
   } catch (err) {
     console.error("Error sending email:", err);
   }

@@ -19,13 +19,12 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
   );
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [notifyModal, setNotifyModal] = useState(false);
-  const [priority, setPriority] = useState(plan.priorities || []);
+  const [priority, setPriority] = useState(plan.priorities);
+
   const [deletedPriorities, setDeletedPriorities] = useState([]);
   const [data, setData] = useState(plan);
   const modalRef = useRef(null);
   const navigate = useNavigate();
-  console.log("dataModify", data);
-  console.log("deletePriority", deletedPriorities);
 
   const previousData = useRef(plan);
 
@@ -33,61 +32,16 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
     previousData.current = plan;
   }, [plan]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: name === "maxTasksPerDay" ? Number(value) : value,
-    }));
-  };
+  useEffect(() => {}, []);
 
-  const addPriority = () => {
-    const newPriority = { name: "", point: "" };
-
-    setPriority((prevPriorities) => {
-      const updatedPriorities = [...prevPriorities, newPriority];
-      return updatedPriorities;
-    });
-  };
-
-  const handleToggleMaxTasks = () => {
-    setIsOnMaxTasks((prev) => {
-      if (prev) {
-        setPreviousMaxTasksPerDay(data.maxTasksPerDay);
-        setData((prevData) => ({
-          ...prevData,
-          maxTasksPerDay: 999999,
-        }));
-      } else {
-        setData((prevData) => ({
-          ...prevData,
-          maxTasksPerDay: previousMaxTasksPerDay,
-        }));
-      }
-      return !prev;
-    });
-  };
-
-  const removePriority = (index) => {
-    const removedPriority = priority[index];
-    setPriority((prevPriorities) =>
-      prevPriorities.filter((_, i) => i !== index)
-    );
-    setDeletedPriorities((prevDeleted) => [...prevDeleted, removedPriority]);
-  };
-
-  const closeNotifyModal = (e) => {
-    e.stopPropagation();
-    setNotifyModal(false);
-  };
-
-  const openNotifyModal = () => {
-    setNotifyModal(true);
-  };
-
-  const handleToggle = () => {
-    setIsOnPriority((prev) => !prev);
-  };
+  useEffect(() => {
+    setData({ ...plan });
+    setPriority(plan.priorities);
+    setIsOnPriority(plan.autoPlan || false);
+    setIsOnMaxTasks(plan.maxTasksPerDay !== 999999);
+    setPreviousMaxTasksPerDay(plan.maxTasksPerDay);
+    setDeletedPriorities([]);
+  }, [plan]);
 
   useEffect(() => {
     setData((prevData) => ({
@@ -96,6 +50,17 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
       autoPlan: isOnPriority,
     }));
   }, [priority, isOnPriority]);
+
+  useEffect(() => {
+    if (data.startDate) {
+      const formattedStartDate = formatDateToDDMMYYYY(data.startDate);
+      setData((prevData) => ({ ...prevData, startDate: formattedStartDate }));
+    }
+    if (data.endDate) {
+      const formattedendDate = formatDateToDDMMYYYY(data.endDate);
+      setData((prevData) => ({ ...prevData, endDate: formattedendDate }));
+    }
+  }, []);
 
   const formatDateToDDMMYYYY = (date) => {
     const [year, month, day] = date.split("-");
@@ -118,7 +83,6 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
           planId: data.id,
         });
       }
-      console.log("Added new priorities:", newPriorities);
     }
 
     const updatedPriorities = data.priorities.map((priority) => ({
@@ -151,9 +115,33 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
 
     await modifyPlan(dataModify);
 
-    console.log("Updated plan data:", dataModify);
     onCloseModal();
     navigate(0);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setData((prevData) => ({
+      ...prevData,
+      [name]: name === "maxTasksPerDay" ? Number(value) : value,
+    }));
+  };
+
+  const addPriority = () => {
+    const newPriority = { name: "", point: "" };
+
+    setPriority((prevPriorities) => {
+      const updatedPriorities = [...prevPriorities, newPriority];
+      return updatedPriorities;
+    });
+  };
+
+  const removePriority = (index) => {
+    const removedPriority = priority[index];
+    setPriority((prevPriorities) =>
+      prevPriorities.filter((_, i) => i !== index)
+    );
+    setDeletedPriorities((prevDeleted) => [...prevDeleted, removedPriority]);
   };
 
   const handlePriorityChange = (index, name, value) => {
@@ -165,6 +153,37 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
     });
 
     setPriority(updatedPriorities);
+  };
+
+  const handleToggleMaxTasks = () => {
+    setIsOnMaxTasks((prev) => {
+      if (prev) {
+        setPreviousMaxTasksPerDay(data.maxTasksPerDay);
+        setData((prevData) => ({
+          ...prevData,
+          maxTasksPerDay: 999999,
+        }));
+      } else {
+        setData((prevData) => ({
+          ...prevData,
+          maxTasksPerDay: previousMaxTasksPerDay,
+        }));
+      }
+      return !prev;
+    });
+  };
+
+  const closeNotifyModal = (e) => {
+    e.stopPropagation();
+    setNotifyModal(false);
+  };
+
+  const openNotifyModal = () => {
+    setNotifyModal(true);
+  };
+
+  const handleToggle = () => {
+    setIsOnPriority((prev) => !prev);
   };
 
   const handleModalClick = (e) => {

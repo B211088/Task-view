@@ -17,6 +17,7 @@ import { getAuth } from "firebase-admin/auth";
 
 const app = express();
 const httpServer = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 
 const server = new ApolloServer({

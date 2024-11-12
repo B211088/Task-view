@@ -22,8 +22,6 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     maxTasksPerDay: 1,
   });
 
-  console.log(data);
-
   const handleToggle = () => {
     setIsOnPriority((prev) => {
       const newValue = !prev;
@@ -35,14 +33,11 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     });
   };
 
-  console.log(data);
-
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [notifyModal, setNotifyModal] = useState(false);
   const modalRef = useRef(null);
 
-  const closeNotifyModal = (e) => {
-    e.stopPropagation();
+  const closeNotifyModal = () => {
     setNotifyModal(false);
   };
 
@@ -95,7 +90,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
       }
     }
 
-    onAddPlan();
+    onAddPlan(addPlan);
     onCloseModal();
   };
 

@@ -13,19 +13,18 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
   const [plansData, setPlansData] = useState(plans);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
-  const filterRef = useRef(null);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [planId, setPlanId] = useState("");
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
+  const filterRef = useRef(null);
 
   const closeConfirmModal = () => {
     setConfirmModal(false);
   };
-
-  console.log(plansData);
 
   const openConfirmModal = (planId) => {
     setNotify({
@@ -74,7 +73,13 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
 
   const handleAddPlan = (newPlan) => {
     setPlansData((prevPlans) => [...prevPlans, newPlan]);
+    setSortOrder("newest");
   };
+
+  useEffect(() => {
+    setPlansData(plans);
+    setSortOrder("newest");
+  }, [plans]);
 
   const sortPlans = () => {
     const sortedPlans = plansData
@@ -112,7 +117,7 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [popupName]);
+  }, [popupName, sortOrder]);
 
   return (
     <div

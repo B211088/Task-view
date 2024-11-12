@@ -1,11 +1,13 @@
 import { useRef } from "react";
 const NotificationModal = ({ notify, onCloseNotify }) => {
   const modalRef = useRef(null);
+
   const handleModalClick = (e) => {
     e.stopPropagation();
   };
 
-  const handleOverlayClick = () => {
+  const handleOverlayClick = (e) => {
+    e.stopPropagation();
     onCloseNotify();
   };
   return (
@@ -15,11 +17,11 @@ const NotificationModal = ({ notify, onCloseNotify }) => {
     >
       <div className="w-full h-full relative">
         <div
-          className="absolute top-[10%] right-[0%] flex items-center gap-[10px] sm:w-[20%] sm:min-w-[420px] min-w-[300px] w-full bg-bg-light  rounded-[5px] px-[20px] py-[20px]"
+          className="absolute top-[10%] right-[0%] flex items-center justify-between gap-[10px] sm:w-[20%] sm:min-w-[420px] min-w-[300px] w-full bg-bg-light  rounded-[5px] px-[20px] py-[20px]"
           ref={modalRef}
           onClick={handleModalClick}
         >
-          <div className="w-[10%] h-[30px]  text-[1.1rem] font-Nunito font-bold text-center flex items-center">
+          <div className="w-[10%] h-[30px]  text-[1.4rem] font-Nunito font-bold text-center flex items-center">
             {notify.type === "error" ? (
               <i className="fa-solid fa-circle-exclamation error "></i>
             ) : notify.type === "warning" ? (
@@ -28,13 +30,15 @@ const NotificationModal = ({ notify, onCloseNotify }) => {
               <i className="fa-solid fa-circle-check success"></i>
             )}
           </div>
-          <div className=" w-[70%]">{notify.payload}</div>
-          <div className="w-[20%] flex justify-center gap-[10px]  items-center">
+          <div className=" w-[70%] font-Nunito font-semibold">
+            {notify.payload}
+          </div>
+          <div className=" flex  gap-[10px]  items-center">
             <button
-              className="w-[100px] h-[36px] flex items-center justify-center bg-bg-btn-add rounded-[5px] text-[0.8rem] font-bold text-text-light"
+              className="square-container-s flex items-center justify-center rounded-[5px] text-[0.8rem] font-bold border-1 text-text-red "
               onClick={onCloseNotify}
             >
-              Đóng
+              <i className="fa-regular fa-square-minus"></i>
             </button>
           </div>
         </div>

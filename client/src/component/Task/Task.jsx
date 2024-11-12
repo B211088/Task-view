@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import ActionButton from "./ActionButton";
 import ModifyTask from "../Modal/ModifyTask";
-import { deleteTask } from "../../utils/tasksUtils";
+import { deleteTask, updateTask } from "../../utils/tasksUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../Modal/ConfirmModal";
 
@@ -10,8 +10,6 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
   const [isPlay, setIsPlay] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [data, setData] = useState(task);
-  const [intervalId, setIntervalId] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
@@ -47,27 +45,47 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
   const toggleContent = () => {
     setIsContentExpanded(!isContentExpanded);
   };
+  const toggleBtnPlay = async () => {
+    if (taskData.status === "completed") return;
 
-  const toggleBtnPlay = () => {
-    if (!isPlay) {
-      const startTime = Date.now();
-      setData((prevData) => ({
+    const newStatus =
+      isPlay || taskData.status === "in-progress" ? "unmake" : "in-progress";
+
+    setTaskData((prevData) => {
+      const updatedData = {
         ...prevData,
-        timeStart: startTime,
-      }));
-      const id = setInterval(() => {
-        setElapsedTime(Date.now() - startTime);
-      }, 1000);
-      setIntervalId(id);
-    } else {
-      clearInterval(intervalId);
-      setIntervalId(null);
+        status: newStatus,
+      };
+
+      updateTask(updatedData);
+
+      return updatedData;
+    });
+
+    setIsPlay((prevIsPlay) => !prevIsPlay);
+
+    if (plan.autoPlan) {
+      navigate(0);
     }
-    setIsPlay(!isPlay);
   };
 
-  const toggleBtnCompleted = () => {
+  const toggleBtnCompleted = async () => {
     setIsCompleted(!isCompleted);
+    setTaskData({
+      ...data,
+      status: "completed",
+    });
+
+    const updateStatusComplete = {
+      ...data,
+      status: "completed",
+    };
+
+    await updateTask(updateStatusComplete);
+
+    if (plan.autoPlan) {
+      navigate(0);
+    }
   };
 
   useEffect(() => {
@@ -166,7 +184,7 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
             className="square-container-s flex items-center justify-center border-1 rounded-[5px] text-[1rem] cursor-pointer"
             onClick={toggleBtnPlay}
           >
-            {isPlay ? (
+            {isPlay || taskData.status === "in-progress" ? (
               <i className="fa-solid fa-pause"></i>
             ) : (
               <i className="fa-solid fa-play"></i>

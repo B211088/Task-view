@@ -19,10 +19,10 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
   const [notifyModal, setNotifyModal] = useState(false);
   const [isTimeSchedule, setIsTimeSchedule] = useState(false);
   const [isStartDay, setIsStartDay] = useState(false);
+  console.log(plan);
   console.log(data);
 
   const closeNotifyModal = (e) => {
-    e.stopPropagation();
     setNotifyModal(false);
   };
 
@@ -47,10 +47,18 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     }
 
     const planStartDate = new Date(plan.startDate);
-    const inputDate = new Date(data.startDay);
+    const inputDate = new Date(formatDateToDDMMYYYY(data.startDay));
+
+    console.log(inputDate);
+    console.log(planStartDate);
 
     if (inputDate < planStartDate) {
-      alert("Ngày bắt đầu không thể nhỏ hơn ngày bắt đầu của kế hoạch.");
+      openNotifyModal();
+      setNotify({
+        payload:
+          "Ngày bắt đầu công việc không được nhỏ nhơn ngày bắt đầu kế hoạch!!! ",
+        type: "warning",
+      });
       return;
     }
 

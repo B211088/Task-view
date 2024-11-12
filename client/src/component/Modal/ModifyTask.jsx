@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import useDebounce from "./useDebounce";
 import { updateTask } from "../../utils/tasksUtils";
 import { useNavigate } from "react-router-dom";
+import NotificationModal from "./NotificationModal";
 
 const ModifyTask = ({
   onClose,
@@ -17,14 +18,15 @@ const ModifyTask = ({
     estimatedCompletionTime: task.estimatedCompletionTime,
     startDay: task.startDay ? task.startDay : "",
   });
-  console.log("taskModify", data);
   const [status, setStatus] = useState("");
   const [isTimeSchedule, setIsTimeSchedule] = useState(false);
   const [isStartDay, setIsStartDay] = useState(false);
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+  const [notifyModal, setNotifyModal] = useState(false);
   const modalRef = useRef();
   const prevStartDayRef = useRef(data.startDay);
+  const [previousTimeSchedule, setPreviousTimeSchedule] = useState("");
 
-  console.log("taskbefore: ", task);
   const navigate = useNavigate();
   useDebounce(data, 300);
 
@@ -39,23 +41,48 @@ const ModifyTask = ({
   }, [task]);
 
   const handleToggleTimeSchedule = () => {
-    setIsTimeSchedule(!isTimeSchedule);
+    setIsTimeSchedule((prevState) => {
+      const newState = !prevState;
+
+      setData((prevData) => {
+        const newData = {
+          ...prevData,
+          timeSchedule: newState ? previousTimeSchedule : "",
+        };
+        return newData;
+      });
+      if (newState === false) {
+        setPreviousTimeSchedule(data.timeSchedule);
+      }
+
+      return newState;
+    });
   };
 
-  useEffect(() => {
-    if (!isStartDay) {
-      setData({
-        ...data,
-        startDay: "",
-      });
-    }
-  }, [isStartDay]);
+  const prevIsTimeScheduleRef = useRef(isTimeSchedule);
 
   useEffect(() => {
-    if (!isTimeSchedule) {
+    if (prevIsTimeScheduleRef.current !== isTimeSchedule) {
+      prevIsTimeScheduleRef.current = isTimeSchedule;
+    }
+  }, [isTimeSchedule]);
+
+  useEffect(() => {
+    if (data.timeSchedule) {
+      setIsTimeSchedule(true);
+    }
+
+    if (task.startDay) {
+      setIsStartDay(true);
       setData((prevData) => ({
         ...prevData,
-        timeSchedule: task.timeSchedule,
+        startDay: formatDateToDDMMYYYY(task.startDay),
+      }));
+    } else {
+      setIsStartDay(false);
+      setData((prevData) => ({
+        ...prevData,
+        startDay: "",
       }));
     }
 
@@ -67,7 +94,9 @@ const ModifyTask = ({
       title: task.title || prevData.title,
       content: task.content || prevData.content,
       startDay:
-        taskStartDate && taskStartDate >= planStartDate ? data.startDay : "",
+        taskStartDate && taskStartDate >= planStartDate
+          ? formatDateToDDMMYYYY(task.startDay)
+          : prevData.startDay,
       priorityId: task.priority ? task.priority.id : prevData.priorityId,
       estimatedCompletionTime:
         task.estimatedCompletionTime || prevData.estimatedCompletionTime,
@@ -85,14 +114,24 @@ const ModifyTask = ({
     return `${day}-${month}-${year}`;
   };
 
+  const formatDateToDDMMYYYY = (date) => {
+    if (!date || date.split("-").length !== 3) return null;
+    const [year, month, day] = date.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const planStartDate = new Date(formatDateToDDMMYYYY(plan.startDate));
+    const inputDate = new Date(formatDateToDDMMYYYY(data.startDay));
 
-    const selectedStartDay = new Date(data.startDay);
-    const planStartDay = new Date(plan.startDate);
-
-    if (data.startDay && selectedStartDay < planStartDay) {
-      alert("Ngày bắt đầu không được nhỏ hơn ngày bắt đầu của kế hoạch.");
+    if (inputDate < planStartDate && isStartDay) {
+      setNotify({
+        payload:
+          "Ngày bắt đầu công việc không được nhỏ hơn ngày bắt đầu kế hoạch!!!",
+        type: "warning",
+      });
+      openNotifyModal();
       return;
     }
 
@@ -104,13 +143,11 @@ const ModifyTask = ({
     const updateData = {
       ...data,
       startDay: formattedStartDay,
-      estimatedCompletionTime: parseInt(data.estimatedCompletionTime, 10),
+      estimatedCompletionTime: parseInt(
+        data.estimatedCompletionTime || "0",
+        10
+      ),
     };
-
-    console.log("updateData", updateData);
-    console.log("task.startDay", task.startDay);
-
-    console.log("formattedStartDay", formattedStartDay);
 
     await updateTask(updateData);
     onClose();
@@ -137,6 +174,14 @@ const ModifyTask = ({
     setIsStartDay(!isStartDay);
   };
 
+  const closeNotifyModal = () => {
+    setNotifyModal(false);
+  };
+
+  const openNotifyModal = () => {
+    setNotifyModal(true);
+  };
+
   return (
     <div
       className="fixed top-0 bottom-0 right-0 left-0 flex items-center justify-center bg-overlay z-1 px-[20px]"
@@ -147,6 +192,9 @@ const ModifyTask = ({
         className="sm:w-[20%] sm:min-w-[380px] min-w-[320px] w-full bg-bg-light z rounded-[5px] px-[10px] py-[20px]"
         onClick={handleModalClick}
       >
+        {notifyModal && (
+          <NotificationModal notify={notify} onCloseNotify={closeNotifyModal} />
+        )}
         <div className="w-full mb-[20px] text-[1.1rem] font-Nunito font-bold text-center">
           <h1>Chỉnh sửa công việc</h1>
         </div>
@@ -274,7 +322,6 @@ const ModifyTask = ({
             className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[5px] rounded-[5px]"
             value={data.status}
             onChange={handleChange}
-            required
           >
             <option value="">{status}</option>
             <option value="unmake">Chưa làm</option>
