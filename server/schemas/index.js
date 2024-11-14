@@ -24,11 +24,11 @@ type Task {
   title: String!
   content: String
   status: String!
-  timeSchedule: String
+  timeSchedule: Float
+  timeIsPlay: Float
   prerequisites: [String]
   estimatedCompletionTime: Int
   startDay: String
-  dueDate: String
   priorityId: String
   priority: Priority
   planId: String!
@@ -69,8 +69,9 @@ type Mutation {
     title: String!,
     content: String,
     status: String!,
-    timeSchedule: String,
     startDay: String,
+    timeSchedule: Float
+    timeIsPlay: Float
     planId: String!,
     priorityId: String,
     prerequisites: [String],
@@ -82,7 +83,8 @@ type Mutation {
     title: String!,
     content: String,
     status: String!,
-    timeSchedule: String,
+    timeSchedule: Float,
+    timeIsPlay: Float,
     startDay: String,
     priorityId: String,
     prerequisites: [String],

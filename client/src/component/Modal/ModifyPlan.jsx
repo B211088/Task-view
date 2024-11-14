@@ -68,6 +68,18 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
   };
 
   const handleSavePlan = async () => {
+    const planStartDate = data.startDate;
+    const planEndDate = data.endDate;
+
+    if (planStartDate > planEndDate) {
+      setNotify({
+        payload: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc",
+        type: "error",
+      });
+      setNotifyModal(true);
+      return;
+    }
+
     if (deletedPriorities.length > 0) {
       await deletePriority(deletedPriorities);
       console.log("Deleted priorities to remove:", deletedPriorities);

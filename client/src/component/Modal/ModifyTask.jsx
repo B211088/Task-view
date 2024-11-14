@@ -19,7 +19,6 @@ const ModifyTask = ({
     startDay: task.startDay ? task.startDay : "",
   });
   const [status, setStatus] = useState("");
-  const [isTimeSchedule, setIsTimeSchedule] = useState(false);
   const [isStartDay, setIsStartDay] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [notifyModal, setNotifyModal] = useState(false);
@@ -40,38 +39,7 @@ const ModifyTask = ({
     }
   }, [task]);
 
-  const handleToggleTimeSchedule = () => {
-    setIsTimeSchedule((prevState) => {
-      const newState = !prevState;
-
-      setData((prevData) => {
-        const newData = {
-          ...prevData,
-          timeSchedule: newState ? previousTimeSchedule : "",
-        };
-        return newData;
-      });
-      if (newState === false) {
-        setPreviousTimeSchedule(data.timeSchedule);
-      }
-
-      return newState;
-    });
-  };
-
-  const prevIsTimeScheduleRef = useRef(isTimeSchedule);
-
   useEffect(() => {
-    if (prevIsTimeScheduleRef.current !== isTimeSchedule) {
-      prevIsTimeScheduleRef.current = isTimeSchedule;
-    }
-  }, [isTimeSchedule]);
-
-  useEffect(() => {
-    if (data.timeSchedule) {
-      setIsTimeSchedule(true);
-    }
-
     if (task.startDay) {
       setIsStartDay(true);
       setData((prevData) => ({
@@ -101,7 +69,7 @@ const ModifyTask = ({
       estimatedCompletionTime:
         task.estimatedCompletionTime || prevData.estimatedCompletionTime,
     }));
-  }, [task, plan, isTimeSchedule]);
+  }, [task, plan]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -120,29 +88,40 @@ const ModifyTask = ({
     return `${day}-${month}-${year}`;
   };
 
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-");
+    return new Date(year, month - 1, day);
+  };
+
+  console.log(data);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const planStartDate = new Date(formatDateToDDMMYYYY(plan.startDate));
-    const inputDate = new Date(formatDateToDDMMYYYY(data.startDay));
+    const planStartDate = parseDate(plan.startDate);
+    const planEndDate = parseDate(plan.endDate);
+    const inputDate = parseDate(formatDateToDDMMYYYY(data.startDay));
 
-    if (inputDate < planStartDate && isStartDay) {
+    if (isStartDay && inputDate < planStartDate) {
       setNotify({
-        payload:
-          "Ngày bắt đầu công việc không được nhỏ hơn ngày bắt đầu kế hoạch!!!",
+        payload: "Ngày bắt đầu công việc sớm hơn ngày bắt đầu kế hoạch",
         type: "warning",
       });
       openNotifyModal();
       return;
     }
 
-    const formattedStartDay =
-      data.startDay !== prevStartDayRef.current
-        ? formatDate(data.startDay)
-        : task.startDay;
+    if (isStartDay && inputDate > planEndDate) {
+      setNotify({
+        payload: "Ngày bắt đầu công việc đã quá hạn kết thúc của kế hoạch!!!",
+        type: "warning",
+      });
+      openNotifyModal();
+      return;
+    }
 
     const updateData = {
       ...data,
-      startDay: formattedStartDay,
+      startDay: isStartDay ? formatDateToDDMMYYYY(data.startDay) : "",
       estimatedCompletionTime: parseInt(
         data.estimatedCompletionTime || "0",
         10
@@ -156,10 +135,24 @@ const ModifyTask = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value || prevData[name],
-    }));
+
+    if (name === "title" && value === "") {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+    if (name === "content" && value === "") {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    } else {
+      setData((prevData) => ({
+        ...prevData,
+        [name]: value || prevData[name],
+      }));
+    }
   };
 
   const handleOverlayClick = () => {
@@ -214,7 +207,6 @@ const ModifyTask = ({
             placeholder="Thêm mô tả"
             value={data.content}
             onChange={handleChange}
-            required
           />
           {autoPlan && (
             <input
@@ -263,39 +255,7 @@ const ModifyTask = ({
               />
             </div>
           )}
-          <div className="flex items-center gap-[10px]">
-            <label className="relative w-[40px] inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isTimeSchedule}
-                onChange={handleToggleTimeSchedule}
-                className="sr-only peer"
-              />
-              <div
-                className={`w-[40px] flex items-center h-[20px] bg-color-dark-800 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 
-                  transition-all duration-300 ${
-                    isTimeSchedule ? "bg-text-dark-700" : "bg-text-dark-100"
-                  }`}
-              ></div>
-              <span
-                className={`absolute top-[10%] left-1 h-[16px] w-[16px] bg-text-light rounded-full transition-transform duration-300 transform 
-                  ${isTimeSchedule ? "translate-x-[15px]" : ""}`}
-              ></span>
-            </label>
-            <h3 className="px-[5px] text-[0.75rem]">Giờ bắt đầu làm việc</h3>
-          </div>
 
-          {isTimeSchedule && (
-            <div className="flex flex-col gap-[5px]">
-              <input
-                name="timeSchedule"
-                className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
-                type="time"
-                value={data.timeSchedule}
-                onChange={handleChange}
-              />
-            </div>
-          )}
           {autoPlan && (
             <select
               name="priorityId"

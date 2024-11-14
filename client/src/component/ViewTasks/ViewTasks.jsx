@@ -8,6 +8,7 @@ import {
 import AddTask from "../Modal/AddTask";
 import ListTask from "./ListTask";
 import ModifyPlan from "../Modal/ModifyPlan";
+import ConfirmModal from "../Modal/ConfirmModal";
 
 const ViewTasks = () => {
   const { plan } = useLoaderData();
@@ -19,6 +20,56 @@ const ViewTasks = () => {
   const [planData, setPlanData] = useState(plan);
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
+
+  const [expiredPlan, setExpiredPlan] = useState(false);
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+
+  const [progressPercentage, setProgressPercentage] = useState(0);
+
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  useEffect(() => {
+    const currentDate = getCurrentDate();
+    if (plan.endDate === "") {
+      return;
+    }
+    if (plan.endDate < currentDate) {
+      setExpiredPlan(true);
+      setNotify({
+        payload:
+          "Kế hoạch của bạn đã hết hạn bạn có muốn thêm thời hạn kết thúc của kế hoạch",
+        type: "error",
+      });
+    }
+  }, [plan.endDate]);
+
+  useEffect(() => {
+    const calculateProgress = () => {
+      const completedTasks = tasks.filter(
+        (task) => task.status === "completed"
+      ).length;
+      const totalTasks = tasks.length;
+      const percentage =
+        totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+      setProgressPercentage(Math.round(percentage));
+    };
+
+    calculateProgress();
+  }, [tasks]);
+
+  const closeConfirmModal = () => {
+    setExpiredPlan(false);
+  };
+
+  const handleExtendPlan = () => {
+    setIsModify(true);
+  };
 
   useEffect(() => {
     if (popupName === "add-task") {
@@ -177,7 +228,7 @@ const ViewTasks = () => {
   };
 
   return (
-    <div className="w-full flex justify-between height-container-taskview  ">
+    <div className="w-full flex justify-between height-container-taskview">
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
         <div className="w-full flex items-center justify-between gap-[10px]">
           <div
@@ -187,8 +238,19 @@ const ViewTasks = () => {
             <i className="fa-solid fa-notes-medical"></i>
           </div>
           <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center px-[20px]">
-            <div className="flex w-full items-center justify-between font-Nunito font-bold">
-              <h1>{plan.name}</h1>
+            <div className="flex w-full items-center justify-between font-Nunito font-bold gap-[20px]">
+              <div className="flex flex-1 items-center justify-between gap-[10px]">
+                <h1>{plan.name}</h1>
+                <div className="flex items-center">
+                  <div className="w-[120px] bg-color-dark-800 rounded h-[5px]">
+                    <div
+                      className="bg-bg-btn-add h-[4px] rounded"
+                      style={{ width: `${progressPercentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="ml-2 text-sm">{progressPercentage}%</span>
+                </div>
+              </div>
               <div
                 className="square-container-s flex items-center justify-center border-1 rounded-[5px] cursor-pointer text-text-dark-600 hover:text-text-dark-1000"
                 onClick={openModifyModal}
@@ -210,33 +272,33 @@ const ViewTasks = () => {
 
         <div className="w-full height-container-taskdetails flex flex-col gap-2 border-1 rounded bg-bg-light flex-1">
           <div className="flex w-full overflow-auto custom-scrollbar-1">
-            {Object.keys(scheduledTasks).map((day) => {
-              return (
-                <ListTask
-                  priorities={plan.priorities}
-                  key={day}
-                  tasks={scheduledTasks[day]}
-                  date={day}
-                  autoPlan={autoPlan}
-                  plan={plan}
-                />
-              );
-            })}
+            {Object.keys(scheduledTasks).map((day) => (
+              <ListTask
+                priorities={plan.priorities}
+                key={day}
+                tasks={scheduledTasks[day]}
+                date={day}
+                autoPlan={autoPlan}
+                plan={plan}
+              />
+            ))}
           </div>
         </div>
-        {
-          isModify && (
-            <ModifyPlan
-              plan={plan}
-              onClose={() => setIsModify(false)}
-              onCloseModal={closeModifyModal}
-            />
-          )
-
-          // Add your code for ModifyPlan component here
-        }
+        {isModify && (
+          <ModifyPlan
+            plan={plan}
+            onClose={() => setIsModify(false)}
+            onCloseModal={closeModifyModal}
+          />
+        )}
       </div>
-
+      {expiredPlan && (
+        <ConfirmModal
+          notify={notify}
+          onClose={closeConfirmModal}
+          onConfirm={handleExtendPlan}
+        />
+      )}
       <Outlet />
     </div>
   );

@@ -20,6 +20,7 @@ export const tasksLoader = async ({ params: { planId } }) => {
         status
         startDay
         timeSchedule
+        timeIsPlay
         priority {
           id
           name
@@ -45,8 +46,9 @@ export const addTask = async (taskData) => {
     $title: String!,
     $content: String,
     $status: String!,
-    $timeSchedule: String,
     $startDay: String,
+    $timeSchedule: Float,
+    $timeIsPlay: Float,
     $planId: String!,
     $priorityId: String,
     $prerequisites: [String],
@@ -56,8 +58,9 @@ export const addTask = async (taskData) => {
       title: $title,
       content: $content,
       status: $status,
-      timeSchedule: $timeSchedule,
       startDay: $startDay,
+      timeSchedule: $timeSchedule,
+      timeIsPlay: $timeIsPlay,
       planId: $planId,
       priorityId: $priorityId,
       prerequisites: $prerequisites,
@@ -68,6 +71,7 @@ export const addTask = async (taskData) => {
       content
       status
       timeSchedule
+      timeIsPlay
       startDay
       priority {
         id
@@ -93,7 +97,8 @@ export const updateTask = async (taskData) => {
     $title: String!,
     $content: String,
     $status: String!,
-    $timeSchedule: String,
+    $timeSchedule: Float,
+    $timeIsPlay: Float,
     $startDay: String,
     $priorityId: String,
     $prerequisites: [String],
@@ -105,6 +110,7 @@ export const updateTask = async (taskData) => {
       content: $content,
       status: $status,
       timeSchedule: $timeSchedule,
+      timeIsPlay: $timeIsPlay,
       startDay: $startDay,
       priorityId: $priorityId,
       prerequisites: $prerequisites,
@@ -115,6 +121,7 @@ export const updateTask = async (taskData) => {
       content
       status
       timeSchedule
+      timeIsPlay
       startDay
       priority {
         id

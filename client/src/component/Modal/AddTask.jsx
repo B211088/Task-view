@@ -8,7 +8,8 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     title: "",
     content: "",
     status: "",
-    timeSchedule: "",
+    timeSchedule: null,
+    timeIsPlay: null,
     prerequisites: [],
     estimatedCompletionTime: 1,
     startDay: "",
@@ -17,10 +18,7 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
   });
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [notifyModal, setNotifyModal] = useState(false);
-  const [isTimeSchedule, setIsTimeSchedule] = useState(false);
   const [isStartDay, setIsStartDay] = useState(false);
-  console.log(plan);
-  console.log(data);
 
   const closeNotifyModal = (e) => {
     setNotifyModal(false);
@@ -40,27 +38,35 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const planStartDate = plan.startDate;
+    const planEndDate = plan.endDate;
+    const inputDate = formatDateToDDMMYYYY(data.startDay);
+
+    if (inputDate >= planStartDate === false && !inputDate) {
+      setNotify({
+        payload: "v",
+        type: "warning",
+      });
+      openNotifyModal();
+      return;
+    }
+
+    if (inputDate <= planEndDate === false && !inputDate) {
+      setNotify({
+        payload: "Ngày bắt đầu công việc đã quá hạn kết thúc của kế hoạch!!!",
+        type: "warning",
+      });
+      openNotifyModal();
+      return;
+    }
+
     if (!data.title || !data.status) {
       openNotifyModal();
       setNotify({ payload: "vui lòng nhập đầy đủ thông tin", type: "warning" });
       return;
     }
 
-    const planStartDate = new Date(plan.startDate);
-    const inputDate = new Date(formatDateToDDMMYYYY(data.startDay));
-
-    console.log(inputDate);
-    console.log(planStartDate);
-
-    if (inputDate < planStartDate) {
-      openNotifyModal();
-      setNotify({
-        payload:
-          "Ngày bắt đầu công việc không được nhỏ nhơn ngày bắt đầu kế hoạch!!! ",
-        type: "warning",
-      });
-      return;
-    }
+    const estimatedCompletionTime = parseInt(data.estimatedCompletionTime);
 
     if (
       !data ||
@@ -73,7 +79,6 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       return;
     }
 
-    const estimatedCompletionTime = parseInt(data.estimatedCompletionTime);
     if (isNaN(estimatedCompletionTime) || estimatedCompletionTime < 1) {
       throw new Error(
         "Estimated Completion Time must be a valid number and greater than or equal to 1."
@@ -120,15 +125,6 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
   };
 
   useEffect(() => {
-    if (!isTimeSchedule) {
-      setData({
-        ...data,
-        timeSchedule: "",
-      });
-    }
-  }, [isTimeSchedule]);
-
-  useEffect(() => {
     if (!isStartDay) {
       setData({
         ...data,
@@ -136,10 +132,6 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       });
     }
   }, [isStartDay]);
-
-  const handleToggleTimeSchedule = () => {
-    setIsTimeSchedule(!isTimeSchedule);
-  };
 
   const handleToggleStartDay = () => {
     setIsStartDay(!isStartDay);
@@ -178,39 +170,6 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
               value={data.content}
               onChange={handleChange}
             />
-            <div className="flex items-center gap-[10px]">
-              <label className="relative w-[40px] inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isTimeSchedule}
-                  onChange={handleToggleTimeSchedule}
-                  className="sr-only peer"
-                />
-                <div
-                  className={`w-[40px] flex items-center h-[20px] bg-color-dark-800 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 
-                  transition-all duration-300 ${
-                    isTimeSchedule ? "bg-text-dark-700" : "bg-text-dark-100"
-                  }`}
-                ></div>
-                <span
-                  className={`absolute top-[10%] left-1 h-[16px] w-[16px] bg-text-light rounded-full transition-transform duration-300 transform 
-                  ${isTimeSchedule ? "translate-x-[15px]" : ""}`}
-                ></span>
-              </label>
-              <h3 className="px-[5px] text-[0.75rem]">Giờ bắt đầu làm việc</h3>
-            </div>
-
-            {isTimeSchedule && (
-              <div className="flex flex-col gap-[5px]">
-                <input
-                  name="timeSchedule"
-                  className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
-                  type="time"
-                  value={data.timeSchedule}
-                  onChange={handleChange}
-                />
-              </div>
-            )}
 
             {plan.autoPlan === true && (
               <div className="flex items-center gap-[10px]">

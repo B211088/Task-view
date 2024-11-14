@@ -3,6 +3,12 @@
   margin: 0;
   box-sizing: border-box;
 }
+.auth-bg {
+  background-image: url("./assets/images/bg-images.jpg");
+  background-repeat: no-repeat, no-repeat;
+  background-position: top left, bottom right;
+  background-size: cover;
+}
 
 .btn {
   padding: 10px 20px;
@@ -147,6 +153,10 @@
 
 .bg-overlay {
   background-color: rgba(90, 90, 90, 0.7);
+}
+
+.bg-box-shadow {
+  background-color: rgba(29, 29, 29, 0.3);
 }
 
 .task {

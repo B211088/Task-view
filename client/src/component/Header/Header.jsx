@@ -1,8 +1,12 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import UserMenu from "./userMenu";
+import ConfirmModal from "../Modal/ConfirmModal";
 
 const Header = ({ openSideBar }) => {
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+
   const {
     user: { displayName, photoURL, auth },
   } = useContext(AuthContext);
@@ -10,11 +14,24 @@ const Header = ({ openSideBar }) => {
   const [userMenu, setUserMenu] = useState(false);
   const userMenuRef = useRef(null);
 
+  const closeConfirmModal = () => {
+    setConfirmModal(false);
+  };
+
+  const openConfirmModal = () => {
+    setConfirmModal(true);
+  };
+
+  const onConfirm = () => {
+    auth.signOut();
+  };
+
   const handleLogoutUser = () => {
-    const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất không?");
-    if (confirmed) {
-      auth.signOut();
-    }
+    setNotify({
+      payload: "Bạn có chắc chắn muốn đăng xuất tài khoảng này không?",
+      type: "warning",
+    });
+    openConfirmModal();
   };
 
   const onChangeStatusUserMenu = () => {
@@ -62,6 +79,13 @@ const Header = ({ openSideBar }) => {
         </div>
         {userMenu && <UserMenu logOut={handleLogoutUser} name={displayName} />}
       </div>
+      {confirmModal && (
+        <ConfirmModal
+          onClose={closeConfirmModal}
+          onConfirm={onConfirm}
+          notify={notify}
+        />
+      )}
     </div>
   );
 };

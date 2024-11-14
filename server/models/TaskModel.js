@@ -22,7 +22,10 @@ const TaskSchema = mongoose.Schema(
       default: [],
     },
     timeSchedule: {
-      type: String,
+      type: Number,
+    },
+    timeIsPlay: {
+      type: Number,
     },
     startDay: {
       type: String,
@@ -34,9 +37,6 @@ const TaskSchema = mongoose.Schema(
     priorityId: {
       type: String,
       default: "",
-    },
-    dueDate: {
-      type: Date,
     },
   },
   { timestamps: true }

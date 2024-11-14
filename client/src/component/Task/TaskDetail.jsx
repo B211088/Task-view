@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 
@@ -5,6 +6,8 @@ const TaskDetail = ({ onClose }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState({});
   const { task } = useLoaderData();
+  const [elapsedTime, setElapsedTime] = useState(task.timeSchedule);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     if (task.priority === null) {
@@ -25,6 +28,40 @@ const TaskDetail = ({ onClose }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, [task]);
+
+  const startTimer = () => {
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        setElapsedTime((prevElapsedTime) => prevElapsedTime + 1000);
+      }, 1000);
+    }
+  };
+
+  const stopTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (task.status === "in-progress") {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+    return () => stopTimer();
+  }, [task.status]);
+
+  const formatMillisecondsToTime = (milliseconds) => {
+    const seconds = Math.floor((milliseconds / 1000) % 60);
+    const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+    const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
+
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   const body = (
     <div className="sm:w-full sm:h-full h-[500px] w-[78%] hidden sm:flex  flex-col gap-[10px] border-1 rounded-[5px] bg-bg-light p-[10px]">
@@ -82,8 +119,12 @@ const TaskDetail = ({ onClose }) => {
         )} */}
 
         <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-          <span>Bắt đầu lúc: </span>
-          <span>{task.timeSchedule ? task.timeSchedule : "00:00"}</span>
+          <span>Đã làm được </span>
+          <span>
+            {task.timeSchedule || task.status === "in-progress"
+              ? formatMillisecondsToTime(elapsedTime)
+              : "00:00"}
+          </span>
         </div>
       </div>
     </div>
