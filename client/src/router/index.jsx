@@ -9,6 +9,7 @@ import TaskDetail from "../component/Task/TaskDetail";
 import { plansLoader } from "../utils/plansUtils";
 import { tasksLoader } from "../utils/tasksUtils";
 import { taskLoader } from "../utils/taskUtils";
+import Register from "../page/Register";
 
 const AuthLayout = () => {
   return (
@@ -24,6 +25,7 @@ export default createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { element: <Login />, path: "/login" },
+      { element: <Register />, path: "/register" },
       {
         element: <ProtectedRoute />,
         children: [

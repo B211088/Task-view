@@ -13,6 +13,10 @@ const authorSchema = mongoose.Schema(
     },
     gmail: {
       type: String,
+      require: true,
+    },
+    password: {
+      type: String,
     },
   },
   { timestamps: true }

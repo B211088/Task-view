@@ -13,7 +13,7 @@ import "./helper/cron.js";
 
 import { resolvers } from "./resolvers/index.js";
 import { typeDefs } from "./schemas/index.js";
-import { getAuth } from "firebase-admin/auth";
+import authorizationJWT from "./middleware/authorizationJWT.js";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -28,30 +28,11 @@ const server = new ApolloServer({
 
 await server.start();
 
-const authorizationJWT = async (req, res, next) => {
-  const authorizationHeader = req.headers.authorization;
-  if (authorizationHeader) {
-    const accessToKen = authorizationHeader.split(" ")[1];
-    getAuth()
-      .verifyIdToken(accessToKen)
-      .then((decodedToken) => {
-        res.locals.uid = decodedToken.uid;
-        next();
-      })
-      .catch((err) => {
-        console.error("Invalid token:", err);
-        res.status(403).json({ message: "Invalid token" });
-      });
-  } else {
-    return res.status(401).json({ message: "Unauthoried" });
-  }
-};
-
 app.use(express.json());
 app.use(
   cors(),
-  authorizationJWT,
   bodyParser.json(),
+  authorizationJWT,
   expressMiddleware(server, {
     context: async ({ req, res }) => {
       return { uid: res.locals.uid };

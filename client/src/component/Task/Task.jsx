@@ -5,7 +5,7 @@ import { deleteTask, updateTask } from "../../utils/tasksUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../Modal/ConfirmModal";
 
-const Task = ({ autoPlan, task, priorities, plan }) => {
+const Task = ({ autoPlan, task, priorities, plan, onCompelte }) => {
   const [taskData, setTaskData] = useState({
     ...task,
     timeIsPlay: task.timeIsPlay,
@@ -16,7 +16,7 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(task.timeSchedule);
   const intervalRef = useRef(null);
   const navigate = useNavigate();
 
@@ -51,19 +51,18 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
       return;
     }
 
+    if (task.status === "in-progress") {
+      const currentDate = new Date();
+      const elapsedTimeMs = currentDate.getTime() - task.timeIsPlay;
+      setElapsedTime(elapsedTimeMs);
+    }
+
     if (!task.timeIsPlay) {
       setElapsedTime(0);
       setTaskData({
         ...taskData,
         timeIsPlay: null,
       });
-    }
-
-    if (task.timeIsPlay) {
-      const currentDate = new Date();
-      const elapsedTimeMs =
-        currentDate.getTime() - task.timeIsPlay + task.timeSchedule;
-      setElapsedTime(elapsedTimeMs);
     }
   }, [task.timeIsPlay, task.status]);
 
@@ -100,7 +99,7 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
 
       if (task.timeIsPlay) {
         elapsedTimeMs =
-          currentDate.getTime() - task.timeIsPlay + task.timeSchedule;
+          currentDate.getTime() - taskData.timeIsPlay + task.timeSchedule;
       } else {
         elapsedTimeMs = task.timeSchedule;
       }
@@ -123,6 +122,7 @@ const Task = ({ autoPlan, task, priorities, plan }) => {
     setIsCompleted(!isCompleted);
     const updateStatusComplete = { ...taskData, status: "completed" };
     setTaskData(updateStatusComplete);
+    onCompelte(task.id);
     await updateTask(updateStatusComplete);
 
     if (plan.autoPlan) {

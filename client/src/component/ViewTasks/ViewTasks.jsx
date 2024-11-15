@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import {
   Outlet,
   useLoaderData,
@@ -14,17 +14,42 @@ const ViewTasks = () => {
   const { plan } = useLoaderData();
   const { tasks, autoPlan, startDate, maxTasksPerDay } = plan;
   const [isAddModal, setIsAddModal] = useState(false);
+  const [data, setData] = useState([]);
   const [scheduledTasks, setScheduledTasks] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const [isModify, setIsModify] = useState(false);
-  const [planData, setPlanData] = useState(plan);
+  const [planData, setPlanData] = useState(null);
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
-
   const [expiredPlan, setExpiredPlan] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
-
   const [progressPercentage, setProgressPercentage] = useState(0);
+
+  const containerRef = useRef(null);
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollLeft = containerRef.current.scrollLeft;
+
+      localStorage.setItem("scrollPosition", scrollLeft);
+    }
+  };
+
+  useEffect(() => {
+    const savedScrollPosition = localStorage.getItem("scrollPosition");
+    if (containerRef.current && savedScrollPosition !== null) {
+      const scrollPosition = Math.round(parseFloat(savedScrollPosition));
+      containerRef.current.scrollLeft = scrollPosition;
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedScrollPosition = localStorage.getItem("scrollPosition");
+    if (savedScrollPosition && containerRef.current) {
+      const scrollPosition = Math.round(parseFloat(savedScrollPosition));
+      containerRef.current.scrollLeft = scrollPosition;
+    }
+  }, [containerRef.current]);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -34,12 +59,21 @@ const ViewTasks = () => {
     return `${day}-${month}-${year}`;
   };
 
+  const parseDate = (dateString) => {
+    if (!dateString || !dateString.includes("-")) {
+      return null;
+    }
+    const [day, month, year] = dateString.split("-");
+    return new Date(year, month - 1, day);
+  };
+
   useEffect(() => {
-    const currentDate = getCurrentDate();
+    const currentDate = parseDate(getCurrentDate());
+    const planEndDate = parseDate(plan.endDate);
     if (plan.endDate === "") {
       return;
     }
-    if (plan.endDate < currentDate) {
+    if (currentDate > planEndDate) {
       setExpiredPlan(true);
       setNotify({
         payload:
@@ -48,20 +82,6 @@ const ViewTasks = () => {
       });
     }
   }, [plan.endDate]);
-
-  useEffect(() => {
-    const calculateProgress = () => {
-      const completedTasks = tasks.filter(
-        (task) => task.status === "completed"
-      ).length;
-      const totalTasks = tasks.length;
-      const percentage =
-        totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-      setProgressPercentage(Math.round(percentage));
-    };
-
-    calculateProgress();
-  }, [tasks]);
 
   const closeConfirmModal = () => {
     setExpiredPlan(false);
@@ -227,6 +247,41 @@ const ViewTasks = () => {
     setIsModify(false);
   };
 
+  const handleCompleteTask = (taskId) => {
+    const updatedTasks = [...data];
+    const taskIndex = updatedTasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      updatedTasks[taskIndex] = {
+        ...updatedTasks[taskIndex],
+        status: "completed",
+      };
+      setData(updatedTasks);
+    }
+  };
+
+  console.log(plan);
+
+  useEffect(() => {
+    const calculateProgress = () => {
+      const completedTasks = data.filter(
+        (task) => task.status === "completed"
+      ).length;
+      const totalTasks = data.length;
+      const percentage =
+        totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+      setProgressPercentage(Math.round(percentage));
+    };
+
+    calculateProgress();
+  }, [data]);
+
+  useEffect(() => {
+    if (plan) {
+      setData(plan.tasks);
+    }
+  }, [plan]);
+
   return (
     <div className="w-full flex justify-between height-container-taskview">
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
@@ -271,7 +326,11 @@ const ViewTasks = () => {
         </div>
 
         <div className="w-full height-container-taskdetails flex flex-col gap-2 border-1 rounded bg-bg-light flex-1">
-          <div className="flex w-full overflow-auto custom-scrollbar-1">
+          <div
+            className="flex w-full overflow-auto custom-scrollbar-1"
+            ref={containerRef}
+            onScroll={handleScroll}
+          >
             {Object.keys(scheduledTasks).map((day) => (
               <ListTask
                 priorities={plan.priorities}
@@ -280,6 +339,7 @@ const ViewTasks = () => {
                 date={day}
                 autoPlan={autoPlan}
                 plan={plan}
+                onCompelte={handleCompleteTask}
               />
             ))}
           </div>

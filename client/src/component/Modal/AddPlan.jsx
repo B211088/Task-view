@@ -191,6 +191,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
               placeholder="Tên kế hoạch"
               value={data.name}
               onChange={handleChange}
+              autoFocus={true}
             />
             <div className="flex flex-col gap-[5px]">
               <h3 className="px-[5px] text-[0.75rem]">Ngày bắt đầu *</h3>

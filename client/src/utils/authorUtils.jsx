@@ -1,0 +1,1 @@
+import { graphQLRequest } from "./request";

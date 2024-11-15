@@ -36,22 +36,46 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     return `${day}-${month}-${year}`;
   };
 
+  const parseDate = (dateString) => {
+    if (!dateString || !dateString.includes("-")) {
+      return null;
+    }
+    const [day, month, year] = dateString.split("-");
+    return new Date(year, month - 1, day);
+  };
+
+  function parseDateString(dateString) {
+    if (!dateString || !dateString.includes("-")) {
+      return null;
+    }
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  function getEndDate(startDate, daysToAdd) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + daysToAdd);
+    return date;
+  }
+
+  console.log(getEndDate(plan.startDate, data.estimatedCompletionTime));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const planStartDate = plan.startDate;
-    const planEndDate = plan.endDate;
-    const inputDate = formatDateToDDMMYYYY(data.startDay);
+    const planStartDate = parseDateString(plan.startDate);
+    const planEndDate = parseDateString(plan.endDate);
+    const inputDate = parseDate(formatDateToDDMMYYYY(data.startDay));
 
-    if (inputDate >= planStartDate === false && !inputDate) {
+    if (inputDate < planStartDate) {
       setNotify({
-        payload: "v",
+        payload: "Ngày bắt đầu công việc sớm hơn ngày bắt đầu kế hoạch",
         type: "warning",
       });
       openNotifyModal();
       return;
     }
 
-    if (inputDate <= planEndDate === false && !inputDate) {
+    if (inputDate > planEndDate) {
       setNotify({
         payload: "Ngày bắt đầu công việc đã quá hạn kết thúc của kế hoạch!!!",
         type: "warning",
@@ -59,14 +83,26 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       openNotifyModal();
       return;
     }
-
     if (!data.title || !data.status) {
       openNotifyModal();
       setNotify({ payload: "vui lòng nhập đầy đủ thông tin", type: "warning" });
       return;
     }
 
-    const estimatedCompletionTime = parseInt(data.estimatedCompletionTime);
+    if (plan.autoPlan) {
+      let estimatedEndDate = new Date(planStartDate);
+      for (let i = 0; i < data.estimatedCompletionTime; i++) {
+        estimatedEndDate = getEndDate(estimatedEndDate, 1);
+      }
+      if (estimatedEndDate > planEndDate) {
+        setNotify({
+          payload: "Tiến độ công việc không trong thời hạn của kế hoạch",
+          type: "warning",
+        });
+        openNotifyModal();
+        return;
+      }
+    }
 
     if (
       !data ||
@@ -78,6 +114,8 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       alert("Số ngày hoàn thành công việc phải lớn hơn hoặc bằng 1.");
       return;
     }
+
+    const estimatedCompletionTime = parseInt(data.estimatedCompletionTime);
 
     if (isNaN(estimatedCompletionTime) || estimatedCompletionTime < 1) {
       throw new Error(
@@ -162,6 +200,7 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
               placeholder="Thêm tiêu đề"
               value={data.title}
               onChange={handleChange}
+              autoFocus={true}
             />
             <textarea
               name="content"

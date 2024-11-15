@@ -1,6 +1,6 @@
 import Task from "../Task/Task";
 
-const ListTask = ({ tasks, date, autoPlan, priorities, plan }) => {
+const ListTask = ({ tasks, date, autoPlan, priorities, plan, onCompelte }) => {
   const getCurrentDate = () => {
     const today = new Date();
     const day = String(today.getDate()).padStart(2, "0");
@@ -10,12 +10,16 @@ const ListTask = ({ tasks, date, autoPlan, priorities, plan }) => {
     return `${day}-${month}-${year}`;
   };
 
+  const handleComplete = (taskId) => {
+    onCompelte(taskId);
+  };
+
   return (
     <div className=" w-4/12 sm:min-w-[400px] min-w-full    flex flex-col justify-center pb-[10px] px-[10px] border-r">
       <div className="w-full h-[34px] flex items-center justify-center px-2">
         <div className="h-[1px] flex-1 border border-gray-300"></div>
         <div
-          className={`w-[120px] text-sm  flex justify-center items-center border-1 rounded-[5px] font-Nunito font-medium ${
+          className={`w-[120px] text-sm  flex justify-center items-center border-1 rounded-[5px] font-Nunito font-bold ${
             date === getCurrentDate() ? "text-bg-btn-add" : ""
           }  `}
         >
@@ -32,6 +36,7 @@ const ListTask = ({ tasks, date, autoPlan, priorities, plan }) => {
               autoPlan={autoPlan}
               priorities={priorities}
               plan={plan}
+              onCompelte={handleComplete}
             />
           ))
         ) : (

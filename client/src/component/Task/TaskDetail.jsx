@@ -37,6 +37,27 @@ const TaskDetail = ({ onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (task.status === "unmake") {
+      setElapsedTime(task.timeSchedule);
+      return;
+    }
+
+    if (task.status === "in-progress") {
+      const currentDate = new Date();
+      const elapsedTimeMs = currentDate.getTime() - task.timeIsPlay;
+      setElapsedTime(elapsedTimeMs);
+    }
+
+    if (!task.timeIsPlay) {
+      setElapsedTime(0);
+      setData({
+        ...data,
+        timeIsPlay: null,
+      });
+    }
+  }, [task.timeIsPlay, task.status, task]);
+
   const stopTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -119,7 +140,7 @@ const TaskDetail = ({ onClose }) => {
         )} */}
 
         <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-          <span>Đã làm được </span>
+          <span>Đã làm được: </span>
           <span>
             {task.timeSchedule || task.status === "in-progress"
               ? formatMillisecondsToTime(elapsedTime)

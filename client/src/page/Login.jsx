@@ -1,12 +1,14 @@
 import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { AuthContext } from "../context/AuthProvider";
 import { useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { graphQLRequest } from "../utils/request";
 
 const Login = () => {
   const auth = getAuth();
   const { user } = useContext(AuthContext);
+
+  console.log(user);
 
   const handleLoginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -14,9 +16,6 @@ const Login = () => {
     const {
       user: { uid, displayName, email },
     } = await signInWithPopup(auth, provider);
-
-    console.log("Google Provider:", provider);
-    console.log("User Info:", { uid, displayName, email });
 
     const { data } = await graphQLRequest({
       query: `mutation register($uid: String!, $name: String!, $gmail: String!) {
@@ -27,8 +26,6 @@ const Login = () => {
         }}`,
       variables: { uid, name: displayName, gmail: email },
     });
-
-    console.log("register response:", { data });
   };
 
   if (localStorage.getItem("accessToken")) {
@@ -37,11 +34,11 @@ const Login = () => {
 
   return (
     <div className="auth-bg w-full h-[100vh] flex items-center justify-center bg-text-dark-200 gap-[50px] px-[20px]">
-      <div className="sm:w-[50%] w-full flex sm:flex-row flex-col  gap-[50px]">
+      <div className="sm:w-[50%] w-full flex sm:flex-row items-center flex-col  gap-[50px]">
         <div className="sm:w-[50%] w-full h-[190px] flex flex-col justify-center items-center uppercase font-Nunito text-center text-text-light  rounded-[10px] bg-box-shadow pb-[50px]">
           <h1 className=" text-[3rem] font-extrabold"> Task Views</h1>
           <p className=" text-[1.2rem] font-medium  ">
-            Quản lý công việc đẽ dàng hơn với TaskViews{" "}
+            Quản lý công việc dễ dàng hơn với TaskViews{" "}
           </p>
         </div>
         <div className="sm:w-[30%] w-full min-w-[350px]  flex flex-col items-center justify-center gap-[20px]  ">
@@ -74,8 +71,13 @@ const Login = () => {
               <p> Đăng nhập với goolge</p>
             </button>
 
-            <div className="w-full flex items-center justify-center py-[10px]">
+            <div className="w-full flex items-center justify-center py-[10px] gap-[5px]">
               <span>Bạn chưa có tài khoảng? </span>
+              <Link to="/register">
+                <button className="border-none outline-none bg-bg-light font-bold hover:text-bg-btn-add">
+                  Đăng ký
+                </button>
+              </Link>
             </div>
           </div>
         </div>

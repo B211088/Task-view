@@ -89,11 +89,23 @@ const ModifyTask = ({
   };
 
   const parseDate = (dateString) => {
+    if (!dateString || !dateString.includes("-")) {
+      return null;
+    }
     const [day, month, year] = dateString.split("-");
     return new Date(year, month - 1, day);
   };
 
-  console.log(data);
+  function parseDateString(dateString) {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  function getEndDate(startDate, daysToAdd) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + daysToAdd);
+    return date;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,6 +129,21 @@ const ModifyTask = ({
       });
       openNotifyModal();
       return;
+    }
+
+    if (plan.autoPlan) {
+      let estimatedEndDate = new Date(planStartDate);
+      for (let i = 0; i < data.estimatedCompletionTime; i++) {
+        estimatedEndDate = getEndDate(estimatedEndDate, 1);
+      }
+      if (estimatedEndDate > planEndDate) {
+        setNotify({
+          payload: "Tiến độ công việc không trong thời hạn của kế hoạch",
+          type: "warning",
+        });
+        openNotifyModal();
+        return;
+      }
     }
 
     const updateData = {

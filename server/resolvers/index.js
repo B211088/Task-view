@@ -7,6 +7,10 @@ import {
 } from "../models/index.js";
 
 import moment from "moment";
+import jwt from "jsonwebtoken";
+import argon2 from "argon2";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const resolvers = {
   Query: {
@@ -244,17 +248,6 @@ export const resolvers = {
       }
     },
 
-    register: async (parent, args) => {
-      const newUser = new AuthorModel(args);
-      const foundUser = await AuthorModel.findOne({ uid: args.uid });
-
-      if (!foundUser) {
-        await newUser.save();
-        return newUser;
-      }
-      return foundUser;
-    },
-
     addTask: async (parent, args) => {
       const newTask = new TaskModel(args);
       await newTask.save();
@@ -288,6 +281,66 @@ export const resolvers = {
         return deletedTask;
       } catch (error) {
         throw new Error("Error deleting task: " + error.message);
+      }
+    },
+
+    register: async (parent, args) => {
+      const foundUser = await AuthorModel.findOne({ uid: args.uid });
+
+      if (!foundUser) {
+        await newUser.save();
+        return newUser;
+      }
+      return foundUser;
+    },
+
+    registerUser: async (args) => {
+      try {
+        if (!args || typeof args.authorInput !== "object") {
+          throw new Error("Thiếu hoặc sai định dạng 'authorInput'");
+        }
+
+        const { name, gmail, password } = args.authorInput;
+
+        if (!name || !gmail || !password) {
+          throw new Error(
+            "Các trường 'name', 'gmail' và 'password' là bắt buộc."
+          );
+        }
+
+        const foundUser = await AuthorModel.findOne({ gmail });
+        if (foundUser) {
+          throw new Error("Email đã tồn tại.");
+        }
+
+        const hashedPassword = await argon2.hash(password);
+
+        const newUser = new AuthorModel({
+          name,
+          gmail,
+          password: hashedPassword,
+        });
+
+        await newUser.save();
+
+        newUser.uid = newUser._id;
+        await newUser.save();
+
+        const token = jwt.sign(
+          { uid: newUser._id.toString(), gmail: newUser.gmail },
+          process.env.SECRET_KEY,
+          { expiresIn: "1d" }
+        );
+
+        return {
+          uid: newUser._id.toString(),
+          name: newUser.name,
+          gmail: newUser.gmail,
+          token,
+        };
+      } catch (error) {
+        console.error("Lỗi trong registerUser:", error.message);
+        throw new Error(error.message || "Đã xảy ra lỗi không xác định.");
       }
     },
   },
