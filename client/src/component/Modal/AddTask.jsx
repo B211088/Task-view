@@ -24,6 +24,8 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     setNotifyModal(false);
   };
 
+  console.log(plan.tasks.length);
+
   const openNotifyModal = () => {
     setNotifyModal(true);
   };
@@ -58,13 +60,12 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     return date;
   }
 
-  console.log(getEndDate(plan.startDate, data.estimatedCompletionTime));
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const planStartDate = parseDateString(plan.startDate);
     const planEndDate = parseDateString(plan.endDate);
     const inputDate = parseDate(formatDateToDDMMYYYY(data.startDay));
+    const checkDate = formatDateToDDMMYYYY(data.startDay);
 
     if (inputDate < planStartDate) {
       setNotify({
@@ -121,6 +122,15 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       throw new Error(
         "Estimated Completion Time must be a valid number and greater than or equal to 1."
       );
+    }
+
+    if (plan.tasks.length >= plan.maxTasksPerDay) {
+      openNotifyModal();
+      setNotify({
+        payload: `số lượng công việc của ngày ${checkDate} đã đạt giới hạn vui lòng tăng giới hạn để nhập thêm công việc`,
+        type: "warning",
+      });
+      return;
     }
 
     if (data.startDay !== "") {

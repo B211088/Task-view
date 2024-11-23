@@ -26,6 +26,8 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
     setConfirmModal(false);
   };
 
+  console.log(plans);
+
   const openConfirmModal = (planId) => {
     setNotify({
       payload: "Bạn có chắc chắn muốn xóa kế hoạch này?",
@@ -91,9 +93,9 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
       )
       .sort((a, b) => {
         if (sortOrder === "newest") {
-          return b.updatedAt - a.updatedAt;
+          return b.createdAt - a.createdAt;
         } else if (sortOrder === "oldest") {
-          return a.updatedAt - b.updatedAt;
+          return a.createdAt - b.createdAt;
         }
         return 0;
       });

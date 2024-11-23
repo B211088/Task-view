@@ -17,6 +17,7 @@ type Plan {
   tasks: [Task],
   priorities: [Priority],
   updatedAt: String
+  createdAt: String
 }
 
 type Task {

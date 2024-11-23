@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 
-const TaskDetail = ({ onClose }) => {
+const TaskDetail = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState({});
   const { task } = useLoaderData();
@@ -38,25 +38,23 @@ const TaskDetail = ({ onClose }) => {
   };
 
   useEffect(() => {
-    if (task.status === "unmake") {
+    if (task.status === "completed") {
+      stopTimer();
       setElapsedTime(task.timeSchedule);
-      return;
-    }
-
-    if (task.status === "in-progress") {
+    } else if (task.status === "in-progress") {
       const currentDate = new Date();
-      const elapsedTimeMs = currentDate.getTime() - task.timeIsPlay;
-      setElapsedTime(elapsedTimeMs);
+      const elapsedTimeMs = task.timeIsPlay
+        ? currentDate.getTime() - task.timeIsPlay
+        : 0;
+      setElapsedTime(task.timeSchedule + elapsedTimeMs);
+      startTimer();
+    } else {
+      stopTimer();
+      setElapsedTime(task.timeSchedule);
     }
 
-    if (!task.timeIsPlay) {
-      setElapsedTime(0);
-      setData({
-        ...data,
-        timeIsPlay: null,
-      });
-    }
-  }, [task.timeIsPlay, task.status, task]);
+    return () => stopTimer();
+  }, [task.status, task.timeIsPlay, task.timeSchedule]);
 
   const stopTimer = () => {
     if (intervalRef.current) {

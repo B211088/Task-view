@@ -193,6 +193,18 @@
   color: #06bf00;
 }
 
+.bg-error {
+  background-color: #ff3636;
+}
+
+.bg-warning {
+  background-color: #d9c300;
+}
+
+.bg-success {
+  background-color: #06bf00;
+}
+
 /* Thêm vào file CSS của bạn */
 
 /* Thêm vào file CSS của bạn */
@@ -208,4 +220,37 @@
 .modal.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+.addTaskButon:hover {
+  border: 1px solid #06bf00;
+  transition: all 0.5s;
+  color: #06bf00;
+}
+
+.modifyButton:hover {
+  border: 1px solid #9da800dc;
+  transition: all 0.5s;
+  color: #a9970f;
+}
+
+.deletedButton:hover {
+  border: 1px solid #b11111;
+  transition: all 0.5s;
+  color: #d10e0e;
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%); /* Bắt đầu từ bên phải ngoài màn hình */
+  }
+  100% {
+    transform: translateX(
+      0
+    ); /* Cuối cùng modal dừng lại ở vị trí bình thường */
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards; /* Thời gian và kiểu chuyển động */
 }

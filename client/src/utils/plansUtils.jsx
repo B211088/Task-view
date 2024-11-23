@@ -9,6 +9,7 @@ export const plansLoader = async () => {
       endDate
       autoPlan
       updatedAt
+      createdAt
 }
   }`;
 

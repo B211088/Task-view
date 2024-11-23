@@ -248,6 +248,7 @@ const ViewTasks = () => {
   };
 
   const handleCompleteTask = (taskId) => {
+    // Cập nhật trạng thái trong `data`
     const updatedTasks = [...data];
     const taskIndex = updatedTasks.findIndex((task) => task.id === taskId);
 
@@ -256,11 +257,35 @@ const ViewTasks = () => {
         ...updatedTasks[taskIndex],
         status: "completed",
       };
+      setData(updatedTasks); // Cập nhật lại state `data`
+    }
+
+    // Cập nhật trạng thái trong `scheduledTasks`
+    const updatedScheduledTasks = { ...scheduledTasks };
+
+    Object.keys(updatedScheduledTasks).forEach((date) => {
+      updatedScheduledTasks[date] = updatedScheduledTasks[date].map((task) =>
+        task.id === taskId ? { ...task, status: "completed" } : task
+      );
+    });
+
+    console.log("scheduledTasks", updatedScheduledTasks);
+
+    setScheduledTasks(updatedScheduledTasks);
+  };
+
+  const handleProgressTask = (taskId) => {
+    const updatedTasks = [...data];
+    const taskIndex = updatedTasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex !== -1) {
+      updatedTasks[taskIndex] = {
+        ...updatedTasks[taskIndex],
+        status: "in-progress",
+      };
       setData(updatedTasks);
     }
   };
-
-  console.log(plan);
 
   useEffect(() => {
     const calculateProgress = () => {
@@ -287,7 +312,7 @@ const ViewTasks = () => {
       <div className="sm:w-[78%] w-full flex flex-col gap-[10px] sm:mr-[10px] mr-0">
         <div className="w-full flex items-center justify-between gap-[10px]">
           <div
-            className="w-[50px] h-[50px] min-w-[50px] p-[5px] flex items-center justify-center rounded-[5px] border-1 cursor-pointer text-[1.5rem] bg-bg-light"
+            className="w-[50px] h-[50px] addTaskButon min-w-[50px] p-[5px] flex items-center justify-center rounded-[5px] border-1 cursor-pointer text-[1.5rem] bg-bg-light"
             onClick={openAddTaskMpdal}
           >
             <i className="fa-solid fa-notes-medical"></i>
@@ -299,7 +324,7 @@ const ViewTasks = () => {
                 <div className="flex items-center">
                   <div className="w-[120px] bg-color-dark-800 rounded h-[5px]">
                     <div
-                      className="bg-bg-btn-add h-[4px] rounded"
+                      className="bg-bg-btn-add h-[4px] rounded transition-all duration-500"
                       style={{ width: `${progressPercentage}%` }}
                     ></div>
                   </div>
@@ -307,7 +332,7 @@ const ViewTasks = () => {
                 </div>
               </div>
               <div
-                className="square-container-s flex items-center justify-center border-1 rounded-[5px] cursor-pointer text-text-dark-600 hover:text-text-dark-1000"
+                className="square-container-s modifyButton flex items-center justify-center border-1 rounded-[5px] cursor-pointer text-text-dark-600 hover:text-text-dark-1000"
                 onClick={openModifyModal}
               >
                 <i className="fa-solid fa-gear"></i>
@@ -331,7 +356,7 @@ const ViewTasks = () => {
             ref={containerRef}
             onScroll={handleScroll}
           >
-            {Object.keys(scheduledTasks).map((day) => (
+            {Object.keys(scheduledTasks).map((day, index) => (
               <ListTask
                 priorities={plan.priorities}
                 key={day}
@@ -340,6 +365,8 @@ const ViewTasks = () => {
                 autoPlan={autoPlan}
                 plan={plan}
                 onCompelte={handleCompleteTask}
+                onProgress={handleProgressTask}
+                index={index}
               />
             ))}
           </div>

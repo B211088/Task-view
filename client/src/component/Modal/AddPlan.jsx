@@ -180,7 +180,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
         onClick={handleModalClick}
       >
         <div className="w-full mb-[20px] text-[1.1rem] font-Nunito font-bold text-center">
-          <h1>Thêm kế hoạch</h1>
+          <h1>Tạo kế hoạch</h1>
         </div>
         <div className="w-full flex flex-col gap-[20px] z-1">
           <form className="flex flex-col gap-[20px]">

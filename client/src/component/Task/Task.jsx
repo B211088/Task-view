@@ -5,7 +5,7 @@ import { deleteTask, updateTask } from "../../utils/tasksUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../Modal/ConfirmModal";
 
-const Task = ({ autoPlan, task, priorities, plan, onCompelte }) => {
+const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
   const [taskData, setTaskData] = useState({
     ...task,
     timeIsPlay: task.timeIsPlay,
@@ -46,7 +46,7 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte }) => {
   };
 
   useEffect(() => {
-    if (task.status === "unmake") {
+    if (task.status === "unmake" || task.status === "complete") {
       setElapsedTime(taskData.timeSchedule);
       return;
     }
@@ -67,64 +67,69 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte }) => {
   }, [task.timeIsPlay, task.status]);
 
   useEffect(() => {
-    if (task.status === "in-progress") {
+    if (task.status === "completed") {
+      stopTimer();
+      setElapsedTime(taskData.timeSchedule);
+    } else if (task.status === "in-progress") {
+      const currentDate = new Date();
+      const elapsedTimeMs = task.timeIsPlay
+        ? currentDate.getTime() - task.timeIsPlay
+        : 0;
+      setElapsedTime(task.timeSchedule + elapsedTimeMs);
       startTimer();
     } else {
       stopTimer();
+      setElapsedTime(task.timeSchedule);
     }
+
     return () => stopTimer();
-  }, [task.status]);
+  }, [task.status, task.timeIsPlay, task.timeSchedule]);
 
   const toggleBtnPlay = async () => {
-    if (task.status === "completed") return;
-
     const currentDate = new Date();
-
     if (!isPlay) {
-      const timeIsPlay = currentDate.getTime();
-
+      const timeIsPlayCurrent = currentDate.getTime();
       const updateData = {
         ...taskData,
-        timeIsPlay,
+        timeIsPlay: timeIsPlayCurrent,
         status: "in-progress",
       };
-
       setTaskData(updateData);
       await updateTask(updateData);
       startTimer();
-    }
-
-    if (isPlay) {
-      let elapsedTimeMs = 0;
-
-      if (task.timeIsPlay) {
-        elapsedTimeMs =
-          currentDate.getTime() - taskData.timeIsPlay + task.timeSchedule;
-      } else {
-        elapsedTimeMs = task.timeSchedule;
-      }
+      onProgress(task.id);
+    } else {
+      const elapsedTimeMs = elapsedTime;
 
       const updateData = {
         ...taskData,
+        timeIsPlay: null,
         status: "unmake",
         timeSchedule: elapsedTimeMs,
       };
-
       setTaskData(updateData);
       await updateTask(updateData);
       stopTimer();
     }
 
-    setIsPlay((prevIsPlay) => !prevIsPlay);
+    setIsPlay((prev) => !prev);
   };
 
   const toggleBtnCompleted = async () => {
     setIsCompleted(!isCompleted);
-    const updateStatusComplete = { ...taskData, status: "completed" };
-    setTaskData(updateStatusComplete);
-    onCompelte(task.id);
-    await updateTask(updateStatusComplete);
+    const elapsedTimeMs = elapsedTime;
 
+    const updateData = {
+      ...taskData,
+      timeIsPlay: null,
+      status: "completed",
+      timeSchedule: elapsedTimeMs,
+    };
+
+    setTaskData(updateData);
+    onCompelte(task.id);
+    setIsPlay(false);
+    await updateTask(updateData);
     if (plan.autoPlan) {
       navigate(0);
     }
@@ -157,7 +162,10 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte }) => {
   useEffect(() => {
     if (taskData.status === "completed") {
       setIsCompleted(true);
+    } else {
+      setIsCompleted(false);
     }
+
     return () => clearInterval(intervalRef.current);
   }, [taskData.status]);
 

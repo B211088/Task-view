@@ -77,11 +77,11 @@ const Plan = ({ isActive, onClick, plan, openConfirmModal }) => {
         </div>
       </div>
       <div
-        className="square-container-s flex  items-center justify-center border-1 rounded-[5px] bg-bg-light cursor-pointer relative"
+        className="square-container-s flex  items-center justify-center deletedButton border-1 rounded-[5px] bg-bg-light cursor-pointer relative"
         onClick={toggleActionModal}
       >
         <div
-          className="w-full h-full flex  items-center justify-center"
+          className="w-full h-full flex  items-center justify-center "
           onClick={() => openConfirmModal(data.id)}
         >
           <i className="fa-solid fa-trash-can-arrow-up"></i>

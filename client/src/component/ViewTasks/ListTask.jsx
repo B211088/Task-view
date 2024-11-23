@@ -1,6 +1,16 @@
+import { useState } from "react";
 import Task from "../Task/Task";
 
-const ListTask = ({ tasks, date, autoPlan, priorities, plan, onCompelte }) => {
+const ListTask = ({
+  tasks,
+  date,
+  autoPlan,
+  priorities,
+  plan,
+  onCompelte,
+  onProgress,
+  index,
+}) => {
   const getCurrentDate = () => {
     const today = new Date();
     const day = String(today.getDate()).padStart(2, "0");
@@ -12,6 +22,9 @@ const ListTask = ({ tasks, date, autoPlan, priorities, plan, onCompelte }) => {
 
   const handleComplete = (taskId) => {
     onCompelte(taskId);
+  };
+  const handleProgress = (taskId) => {
+    onProgress(taskId);
   };
 
   return (
@@ -37,6 +50,7 @@ const ListTask = ({ tasks, date, autoPlan, priorities, plan, onCompelte }) => {
               priorities={priorities}
               plan={plan}
               onCompelte={handleComplete}
+              onProgress={handleProgress}
             />
           ))
         ) : (
