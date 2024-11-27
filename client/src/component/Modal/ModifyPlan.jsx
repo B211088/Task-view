@@ -52,19 +52,44 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
   }, [priority, isOnPriority]);
 
   useEffect(() => {
-    if (data.startDate) {
-      const formattedStartDate = formatDateToDDMMYYYY(data.startDate);
-      setData((prevData) => ({ ...prevData, startDate: formattedStartDate }));
+    if (data.autoPlan === false) {
+      if (data.startDate) {
+        const formattedStartDate = formatDateToYYYYMMDD(data.startDate);
+        setData((prevData) => ({ ...prevData, startDate: formattedStartDate }));
+      }
+      if (data.endDate) {
+        const formattedEndDate = formatDateToYYYYMMDD(data.endDate);
+        setData((prevData) => ({ ...prevData, endDate: formattedEndDate }));
+      }
+    } else if (data.autoPlan === true) {
+      if (data.startDate) {
+        const formattedStartDate = formatDateToDDMMYYYY(data.startDate);
+        setData((prevData) => ({ ...prevData, startDate: formattedStartDate }));
+      }
+      if (data.endDate) {
+        const formattedEndDate = formatDateToDDMMYYYY(data.endDate);
+        setData((prevData) => ({ ...prevData, endDate: formattedEndDate }));
+      }
     }
-    if (data.endDate) {
-      const formattedendDate = formatDateToDDMMYYYY(data.endDate);
-      setData((prevData) => ({ ...prevData, endDate: formattedendDate }));
+
+    if (isOnMaxTasks) {
+      setData((prevData) => ({
+        ...prevData,
+        maxTasksPerDay: previousMaxTasksPerDay,
+      }));
     }
-  }, []);
+  }, [data.autoPlan, isOnMaxTasks]);
 
   const formatDateToDDMMYYYY = (date) => {
     const [year, month, day] = date.split("-");
     return `${day}-${month}-${year}`;
+  };
+
+  const formatDateToYYYYMMDD = (date) => {
+    if (/\d{4}-\d{2}-\d{2}/.test(date)) return date;
+
+    const [day, month, year] = date.split("-");
+    return `${year}-${month}-${day}`;
   };
 
   const handleSavePlan = async () => {
@@ -82,7 +107,6 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
 
     if (deletedPriorities.length > 0) {
       await deletePriority(deletedPriorities);
-      console.log("Deleted priorities to remove:", deletedPriorities);
     }
 
     const newPriorities = data.priorities.filter((priority) => !priority.id);
@@ -331,6 +355,7 @@ const ModifyPlan = ({ onCloseModal, plan }) => {
                 placeholder="Max tasks per day"
                 value={data.maxTasksPerDay}
                 onChange={handleChange}
+                min="1"
               />
             </div>
           )}

@@ -14,6 +14,7 @@ import "./helper/cron.js";
 import { resolvers } from "./resolvers/index.js";
 import { typeDefs } from "./schemas/index.js";
 import authorizationJWT from "./middleware/authorizationJWT.js";
+import authorRoute from "./routers/authorRoute.js";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -29,9 +30,10 @@ const server = new ApolloServer({
 await server.start();
 
 app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
+app.use("/api/auth", authorRoute);
 app.use(
-  cors(),
-  bodyParser.json(),
   authorizationJWT,
   expressMiddleware(server, {
     context: async ({ req, res }) => {
@@ -52,3 +54,6 @@ mongoose
   .catch((error) => {
     console.error("Database connection error:", error);
   });
+import { getAuth } from "firebase-admin/auth";
+
+export default authorizationJWT;

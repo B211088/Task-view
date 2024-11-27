@@ -163,8 +163,17 @@
   width: 32%;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 640px) {
   .listtask {
+  }
+
+  .height-container {
+    height: 100vh;
+  }
+
+  .height-container-task-list {
+    height: calc(100vh - 252.5px);
+    scroll-behavior: smooth;
   }
 }
 
@@ -242,15 +251,28 @@
 
 @keyframes slide-in-right {
   0% {
-    transform: translateX(100%); /* Bắt đầu từ bên phải ngoài màn hình */
+    transform: translateX(100%);
   }
   100% {
-    transform: translateX(
-      0
-    ); /* Cuối cùng modal dừng lại ở vị trí bình thường */
+    transform: translateX(0);
   }
 }
 
 .animate-slide-in-right {
-  animation: slide-in-right 0.5s ease-out forwards; /* Thời gian và kiểu chuyển động */
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.custom-select {
+  max-height: 120px;
+  overflow-y: auto;
+  display: block;
+}
+
+.custom-select option {
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.task-details {
+  height: 100vh;
 }

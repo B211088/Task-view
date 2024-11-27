@@ -36,17 +36,13 @@ type Task {
 }
 
 type Author {
-  uid: String!,
+  uid: ID!,
   name: String,
   gmail: String!,
   password: String
 }
 
-input AuthorInput {
-  name: String!,
-  gmail: String!,
-  password: String
-}
+
 
 type Query {
   plans: [Plan],
@@ -73,7 +69,7 @@ type Mutation {
   
   register(uid: String!, name: String!, gmail: String!): Author,
 
-  registerUser(authorInput: AuthorInput!): Author
+  
  
   addTask(
     title: String!,
@@ -109,4 +105,6 @@ input ModifyPriorityInput {
   name: String
   point: Int
 }
+
+
 `;

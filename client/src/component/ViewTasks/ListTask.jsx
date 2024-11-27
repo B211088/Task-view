@@ -9,6 +9,7 @@ const ListTask = ({
   plan,
   onCompelte,
   onProgress,
+  onDeleteTask,
   index,
 }) => {
   const getCurrentDate = () => {
@@ -26,9 +27,15 @@ const ListTask = ({
   const handleProgress = (taskId) => {
     onProgress(taskId);
   };
+  const handleDeleted = (taskId) => {
+    onDeleteTask(taskId);
+  };
 
   return (
-    <div className=" w-4/12 sm:min-w-[400px] min-w-full    flex flex-col justify-center pb-[10px] px-[10px] border-r">
+    <div
+      id={date}
+      className=" w-4/12 sm:min-w-[400px] min-w-full  flex flex-col justify-center pb-[10px] px-[10px] border-r"
+    >
       <div className="w-full h-[34px] flex items-center justify-center px-2">
         <div className="h-[1px] flex-1 border border-gray-300"></div>
         <div
@@ -51,6 +58,7 @@ const ListTask = ({
               plan={plan}
               onCompelte={handleComplete}
               onProgress={handleProgress}
+              onDeleteTask={handleDeleted}
             />
           ))
         ) : (

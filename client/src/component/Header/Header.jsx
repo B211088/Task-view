@@ -2,18 +2,23 @@ import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthProvider";
 import UserMenu from "./userMenu";
 import ConfirmModal from "../Modal/ConfirmModal";
+import logo from "../../assets/images/logo.png";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ openSideBar }) => {
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
 
   const {
-    user: { displayName, photoURL, auth },
+    user: { displayName, photoURL, auth, name },
   } = useContext(AuthContext);
+
+  const userDisplayName = displayName || name || "User";
+  const userPhotoURL = photoURL || "";
 
   const [userMenu, setUserMenu] = useState(false);
   const userMenuRef = useRef(null);
-
+  const navigate = useNavigate();
   const closeConfirmModal = () => {
     setConfirmModal(false);
   };
@@ -23,7 +28,11 @@ const Header = ({ openSideBar }) => {
   };
 
   const onConfirm = () => {
-    auth.signOut();
+    if (auth) {
+      auth.signOut();
+    }
+    localStorage.clear();
+    navigate("/login");
   };
 
   const handleLogoutUser = () => {
@@ -59,8 +68,12 @@ const Header = ({ openSideBar }) => {
       >
         <i className="fa-solid fa-bars"></i>
       </div>
-      <div className="text-text-light w-2/12 flex items-center text-[1.2rem] uppercase font-Nunito font-bold">
-        <h1>Logo</h1>
+      <div className="sm:w-2/12 w-6/12  flex items-center sm:justify-start justify-center text-[1.2rem] uppercase font-Nunito font-bold">
+        <img
+          className="min-w-[180px] h-[68px] object-cover"
+          src={logo}
+          alt=""
+        />
       </div>
       <div
         className="relative w-2/12 h-[32px] flex items-center justify-end gap-[10px] text-text-light cursor-pointer"
@@ -68,14 +81,20 @@ const Header = ({ openSideBar }) => {
         ref={userMenuRef}
       >
         <div className="text-[1rem] font-Nunito font-bold sm:flex hidden">
-          {displayName}
+          {userDisplayName}
         </div>
         <div className="square-container-l rounded-full flex items-center justify-center ">
-          <img
-            className="w-full h-full rounded-full object-cover"
-            src={photoURL}
-            alt="Avatar user"
-          />
+          {photoURL ? (
+            <img
+              className="w-full h-full rounded-full object-cover"
+              src={photoURL}
+              alt="Avatar user"
+            />
+          ) : (
+            <div className="h-[50px] w-[50px] border-1 rounded-full flex items-center justify-center ">
+              <h1 className="text-[1.8rem] font-Nunito font-bold">T</h1>
+            </div>
+          )}
         </div>
         {userMenu && <UserMenu logOut={handleLogoutUser} name={displayName} />}
       </div>

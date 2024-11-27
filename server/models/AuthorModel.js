@@ -4,7 +4,6 @@ const authorSchema = mongoose.Schema(
   {
     uid: {
       type: String,
-      required: true,
       unique: true,
     },
     name: {
@@ -21,6 +20,13 @@ const authorSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+
+authorSchema.pre("save", function (next) {
+  if (!this.uid) {
+    this.uid = this._id.toString();
+  }
+  next();
+});
 
 const AuthorModel = mongoose.model("Author", authorSchema);
 

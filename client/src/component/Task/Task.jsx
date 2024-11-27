@@ -4,8 +4,16 @@ import ModifyTask from "../Modal/ModifyTask";
 import { deleteTask, updateTask } from "../../utils/tasksUtils";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../Modal/ConfirmModal";
-
-const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
+import { useSearchParams } from "react-router-dom";
+const Task = ({
+  autoPlan,
+  task,
+  priorities,
+  plan,
+  onCompelte,
+  onProgress,
+  onDeleteTask,
+}) => {
   const [taskData, setTaskData] = useState({
     ...task,
     timeIsPlay: task.timeIsPlay,
@@ -17,6 +25,7 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [elapsedTime, setElapsedTime] = useState(task.timeSchedule);
+  const [heightContent, setHeightContent] = useState(0);
   const intervalRef = useRef(null);
   const navigate = useNavigate();
 
@@ -44,6 +53,15 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
       intervalRef.current = null;
     }
   };
+
+  useEffect(() => {
+    const element = document.getElementById(`content-${task.id}`);
+    if (element) {
+      setHeightContent(element.scrollHeight);
+    } else {
+      console.log("Không tìm thấy phần tử với ID:", `content-${task.id}`);
+    }
+  }, [taskData.content]);
 
   useEffect(() => {
     if (task.status === "unmake" || task.status === "complete") {
@@ -86,7 +104,9 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
   }, [task.status, task.timeIsPlay, task.timeSchedule]);
 
   const toggleBtnPlay = async () => {
+    setIsPlay((prev) => !prev);
     const currentDate = new Date();
+
     if (!isPlay) {
       const timeIsPlayCurrent = currentDate.getTime();
       const updateData = {
@@ -96,11 +116,11 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
       };
       setTaskData(updateData);
       await updateTask(updateData);
+
       startTimer();
       onProgress(task.id);
     } else {
       const elapsedTimeMs = elapsedTime;
-
       const updateData = {
         ...taskData,
         timeIsPlay: null,
@@ -109,10 +129,9 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
       };
       setTaskData(updateData);
       await updateTask(updateData);
+
       stopTimer();
     }
-
-    setIsPlay((prev) => !prev);
   };
 
   const toggleBtnCompleted = async () => {
@@ -135,7 +154,7 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
     }
   };
 
-  const openConfirmModal = async (taskId) => {
+  const openConfirmModal = async () => {
     setNotify({
       payload: "Bạn có chắc chắn muốn xóa công việc này?",
       type: "error",
@@ -143,10 +162,15 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
     setConfirmModal(true);
   };
 
+  const closeConfirmModal = () => {
+    setConfirmModal(false);
+  };
+
   const onConfirm = async () => {
     try {
       await deleteTask(taskData.id);
-      navigate(0);
+      onDeleteTask(taskData.id);
+      closeConfirmModal();
     } catch (error) {
       console.error("Lỗi khi xóa công việc:", error);
       alert("Xóa công việc không thành công.");
@@ -202,11 +226,14 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
 
       {taskData.content != "" ? (
         <div
-          className={`w-full p-[5px] bg-color-dark-1000 rounded-[5px] overflow-hidden ${
-            !isContentExpanded ? "max-h-[46px]" : "max-h-full"
+          className={`w-full p-[5px]  bg-color-dark-1000 rounded-[5px] overflow-hidden ${
+            !isContentExpanded ? "max-h-[48px]" : "max-h-full"
           }`}
         >
-          <p className="w-full text-[0.8rem] text-text-dark-600">
+          <p
+            className="w-full text-[0.8rem] text-text-dark-600"
+            id={`content-${task.id}`}
+          >
             {taskData.content}
           </p>
         </div>
@@ -221,7 +248,7 @@ const Task = ({ autoPlan, task, priorities, plan, onCompelte, onProgress }) => {
         </div>
       )}
 
-      {taskData.content && (
+      {heightContent && heightContent >= 50 && taskData.content !== "" && (
         <div className="w-full flex justify-end">
           <div
             className="flex items-center text-text-dark-600 cursor-pointer text-[0.8rem] gap-[5px]"

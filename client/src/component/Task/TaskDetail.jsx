@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const TaskDetail = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -8,6 +9,7 @@ const TaskDetail = () => {
   const { task } = useLoaderData();
   const [elapsedTime, setElapsedTime] = useState(task.timeSchedule);
   const intervalRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (task.priority === null) {
@@ -18,7 +20,7 @@ const TaskDetail = () => {
       }));
     }
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 640);
     };
 
     handleResize();
@@ -83,7 +85,13 @@ const TaskDetail = () => {
   };
 
   const body = (
-    <div className="sm:w-full sm:h-full h-[500px] w-[78%] hidden sm:flex  flex-col gap-[10px] border-1 rounded-[5px] bg-bg-light p-[10px]">
+    <div className="sm:w-full sm:h-full h-full flex  flex-col gap-[10px] border-1  bg-bg-light p-[10px] sm:rounded-[5px] rounded-[0px]">
+      <div
+        className="w-[30px] h-[30px] text-[1.2rem] rounded-[5px] sm:hidden items-center justify-center border-1 cursor-pointer  flex"
+        onClick={() => navigate(-1)}
+      >
+        <i className="fa-solid fa-arrow-left"></i>
+      </div>
       <div className="w-full flex items-center justify-between font-Nunito font-bold text-[1.2rem] py-[10px]">
         <h4 className="">{task.title}</h4>
       </div>
@@ -106,7 +114,7 @@ const TaskDetail = () => {
       </div>
       <div className="w-full flex flex-col gap-[10px] overflow-auto custom-scrollbar-1">
         <div className="w-full flex font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-          <p>{task.content}</p>
+          <p>{task.content !== "" ? task.content : "Không có nội dung !"}</p>
         </div>
         {task.startDay && (
           <div className="w-full flex gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
@@ -128,14 +136,6 @@ const TaskDetail = () => {
             <span>{`${task.estimatedCompletionTime} Ngày`}</span>
           </div>
         )}
-        {/* {task.prerequisites != [] && (
-          <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
-            <span>Công việc tiên quyết:</span>
-            <span>
-              {(task.prerequisites = [] ? "Không có" : task.prerequisites)}
-            </span>
-          </div>
-        )} */}
 
         <div className="w-full flex  gap-[5px] font-Nunito text-text-dark-800 text-[0.8rem] bg-color-dark-900 rounded-[5px] p-[10px]">
           <span>Đã làm được: </span>
@@ -153,19 +153,20 @@ const TaskDetail = () => {
     <div
       className={`sm:w-[22%] height-container-taskdetails w-full flex justify-center items-center ${
         isMobile
-          ? "sm:static fixed hidden top-0 bottom-0 right-0 left-0 bg-overlay"
+          ? "task-details  sm:static fixed top-0 bottom-0 right-0 left-0 justify-center bg-overlay items-center z-10  "
           : ""
       }`}
     >
       {isMobile ? (
         <div
           id="mobile"
-          className="w-full h-full flex justify-center items-center"
+          className="w-full h-full bg-bg-window "
+          onClick={(e) => e.stopPropagation()}
         >
           {body}
         </div>
       ) : (
-        <div id="pc" className="w-full h-full flex h-full">
+        <div id="pc" className="w-full h-full flex">
           {body}
         </div>
       )}

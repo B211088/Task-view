@@ -133,12 +133,13 @@ const ModifyTask = ({
 
     if (plan.autoPlan) {
       let estimatedEndDate = new Date(planStartDate);
-      for (let i = 0; i < data.estimatedCompletionTime; i++) {
+      for (let i = 1; i < data.estimatedCompletionTime; i++) {
         estimatedEndDate = getEndDate(estimatedEndDate, 1);
       }
+
       if (estimatedEndDate > planEndDate) {
         setNotify({
-          payload: "Tiến độ công việc không trong thời hạn của kế hoạch",
+          payload: `Tiến độ công việc không trong thời hạn của kế hoạch  `,
           type: "warning",
         });
         openNotifyModal();

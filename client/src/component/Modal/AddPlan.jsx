@@ -8,6 +8,7 @@ import NotificationModal from "./NotificationModal";
 const AddPlan = ({ onCloseModal, onAddPlan }) => {
   const [isOnPriority, setIsOnPriority] = useState(false);
   const [isOnMaxTasks, setIsOnMaxTasks] = useState(false);
+  const [maxTasksInput, setMaxTasksInput] = useState(1);
   const [priority, setPriority] = useState([
     {
       name: "",
@@ -19,8 +20,14 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     autoPlan: false,
     startDate: "",
     endDate: "",
-    maxTasksPerDay: 1,
+    maxTasksPerDay: 999999,
   });
+
+  console.log(data);
+
+  const [notify, setNotify] = useState({ payload: "", type: "" });
+  const [notifyModal, setNotifyModal] = useState(false);
+  const modalRef = useRef(null);
 
   const handleToggle = () => {
     setIsOnPriority((prev) => {
@@ -32,10 +39,6 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
       return newValue;
     });
   };
-
-  const [notify, setNotify] = useState({ payload: "", type: "" });
-  const [notifyModal, setNotifyModal] = useState(false);
-  const modalRef = useRef(null);
 
   const closeNotifyModal = () => {
     setNotifyModal(false);
@@ -55,7 +58,7 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
       openNotifyModal();
       setNotify({
         payload: "vui lòng điền đầy đủ Tên kế hoạch và ngày bắt đầu",
-        type: "error",
+        type: "warning",
       });
       console.log("Missing data, returning early");
       return;
@@ -76,7 +79,6 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
     console.log(addPlan);
 
     if (!addPlan) {
-      console.error("Failed to add plan: addPlan is undefined");
       return;
     }
 
@@ -95,25 +97,31 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
   };
 
   const handleToggleMaxTasks = () => {
-    setIsOnMaxTasks(!isOnMaxTasks);
+    setIsOnMaxTasks((prev) => {
+      const newValue = !prev;
+      setData((prevData) => ({
+        ...prevData,
+        maxTasksPerDay: newValue ? maxTasksInput : 999999,
+      }));
+
+      return newValue;
+    });
   };
 
   useEffect(() => {
     if (isOnPriority === false) {
       setPriority([]);
     }
-    if (isOnMaxTasks === false) {
+  }, [isOnPriority]);
+
+  useEffect(() => {
+    if (!isOnMaxTasks) {
       setData((prevData) => ({
         ...prevData,
         maxTasksPerDay: 999999,
       }));
-    } else {
-      setData((prevData) => ({
-        ...prevData,
-        maxTasksPerDay: 1,
-      }));
     }
-  }, [isOnPriority, isOnMaxTasks]);
+  }, [isOnMaxTasks]);
 
   useDebounce(data, 300);
 
@@ -132,19 +140,24 @@ const AddPlan = ({ onCloseModal, onAddPlan }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData((prevData) => {
-      const newValue =
-        name === "maxTasksPerDay" && Number(value) < 1
-          ? 1
-          : name === "maxTasksPerDay"
-          ? Number(value)
-          : value;
 
-      return {
+    if (name === "maxTasksPerDay") {
+      const newValue = Math.max(1, Number(value));
+
+      setMaxTasksInput(newValue);
+
+      if (isOnMaxTasks) {
+        setData((prevData) => ({
+          ...prevData,
+          [name]: newValue,
+        }));
+      }
+    } else {
+      setData((prevData) => ({
         ...prevData,
-        [name]: newValue,
-      };
-    });
+        [name]: value,
+      }));
+    }
   };
 
   const handlePriorityChange = (index, name, value) => {

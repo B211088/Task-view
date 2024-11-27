@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Loading from "../page/Loading";
+import { getUserData } from "../api";
 
 export const AuthContext = createContext();
 
@@ -11,30 +12,60 @@ const AuthProvider = ({ children }) => {
   const auth = getAuth();
 
   const navigate = useNavigate();
-  const [isLoading, setisLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onIdTokenChanged((user) => {
-      if (user?.uid) {
-        setUser(user);
-        if (user.accessToken !== localStorage.getItem("accessToken")) {
-          localStorage.setItem("accessToken", user.accessToken);
-          window.location.reload();
+    const checkAuth = async () => {
+      const unsubscribe = auth.onIdTokenChanged(async (firebaseUser) => {
+        if (firebaseUser?.uid) {
+          if (
+            firebaseUser.accessToken !== localStorage.getItem("accessToken")
+          ) {
+            localStorage.setItem("accessToken", firebaseUser.accessToken);
+            window.location.reload();
+          }
+          setUser(firebaseUser);
+          setIsLoading(false);
+          return;
         }
-        setisLoading(false);
-        return;
-      }
 
-      setisLoading(false);
-      setUser({});
-      localStorage.clear();
-      navigate("/login");
-    });
+        const token = localStorage.getItem("accessToken");
 
-    return () => {
-      unsubscribe();
+        if (token) {
+          try {
+            const userData = await getUserData(token);
+            console.log("User", userData.user);
+
+            if (userData?.user) {
+              const { name, gmail } = userData.user;
+              setUser({
+                displayName: name || "",
+                photoURL: "",
+                auth: null,
+                gmail,
+              });
+
+              localStorage.setItem("accessToken", token);
+            }
+            setIsLoading(false);
+            return;
+          } catch (error) {
+            console.error("Failed to fetch user data:", error);
+            setIsLoading(false);
+          }
+        }
+
+        setIsLoading(false);
+        setUser(null);
+        localStorage.clear();
+        navigate("/login");
+      });
+
+      return () => unsubscribe();
     };
-  }, [auth]);
+
+    checkAuth();
+  }, [auth, navigate]);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>

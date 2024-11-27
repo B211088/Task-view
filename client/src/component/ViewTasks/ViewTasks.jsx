@@ -9,6 +9,7 @@ import AddTask from "../Modal/AddTask";
 import ListTask from "./ListTask";
 import ModifyPlan from "../Modal/ModifyPlan";
 import ConfirmModal from "../Modal/ConfirmModal";
+import { tasksLoader } from "../../utils/tasksUtils";
 
 const ViewTasks = () => {
   const { plan } = useLoaderData();
@@ -51,6 +52,15 @@ const ViewTasks = () => {
     }
   }, [containerRef.current]);
 
+  const handleSelectChange = (event) => {
+    const selectedDate = event.target.value;
+    const targetElement = document.getElementById(selectedDate);
+
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const getCurrentDate = () => {
     const today = new Date();
     const day = String(today.getDate()).padStart(2, "0");
@@ -68,17 +78,24 @@ const ViewTasks = () => {
   };
 
   useEffect(() => {
-    const currentDate = parseDate(getCurrentDate());
-    const planEndDate = parseDate(plan.endDate);
-    if (plan.endDate === "") {
+    if (!plan.endDate) {
       return;
     }
+
+    const currentDate = parseDate(getCurrentDate());
+    const planEndDate = parseDate(plan.endDate);
+
+    if (!planEndDate || isNaN(planEndDate.getTime())) {
+      console.error("Ngày kết thúc không hợp lệ:", plan.endDate);
+      return;
+    }
+
     if (currentDate > planEndDate) {
       setExpiredPlan(true);
       setNotify({
         payload:
-          "Kế hoạch của bạn đã hết hạn bạn có muốn thêm thời hạn kết thúc của kế hoạch",
-        type: "error",
+          "Kế hoạch của bạn đã hết hạn. Bạn có muốn thêm thời hạn kết thúc cho kế hoạch?",
+        type: "warning",
       });
     }
   }, [plan.endDate]);
@@ -248,43 +265,58 @@ const ViewTasks = () => {
   };
 
   const handleCompleteTask = (taskId) => {
-    // Cập nhật trạng thái trong `data`
-    const updatedTasks = [...data];
-    const taskIndex = updatedTasks.findIndex((task) => task.id === taskId);
+    const updatedTasks = data.map((task) =>
+      task.id === taskId ? { ...task, status: "completed" } : task
+    );
+    setData(updatedTasks);
 
-    if (taskIndex !== -1) {
-      updatedTasks[taskIndex] = {
-        ...updatedTasks[taskIndex],
-        status: "completed",
-      };
-      setData(updatedTasks); // Cập nhật lại state `data`
-    }
-
-    // Cập nhật trạng thái trong `scheduledTasks`
-    const updatedScheduledTasks = { ...scheduledTasks };
-
-    Object.keys(updatedScheduledTasks).forEach((date) => {
-      updatedScheduledTasks[date] = updatedScheduledTasks[date].map((task) =>
-        task.id === taskId ? { ...task, status: "completed" } : task
-      );
-    });
-
-    console.log("scheduledTasks", updatedScheduledTasks);
+    const updatedScheduledTasks = Object.fromEntries(
+      Object.entries(scheduledTasks).map(([date, tasks]) => [
+        date,
+        tasks.map((task) =>
+          task.id === taskId ? { ...task, status: "completed" } : task
+        ),
+      ])
+    );
 
     setScheduledTasks(updatedScheduledTasks);
   };
 
   const handleProgressTask = (taskId) => {
-    const updatedTasks = [...data];
-    const taskIndex = updatedTasks.findIndex((task) => task.id === taskId);
+    const updatedScheduledTasks = { ...scheduledTasks };
 
-    if (taskIndex !== -1) {
-      updatedTasks[taskIndex] = {
-        ...updatedTasks[taskIndex],
-        status: "in-progress",
-      };
-      setData(updatedTasks);
-    }
+    Object.keys(updatedScheduledTasks).forEach((date) => {
+      updatedScheduledTasks[date] = updatedScheduledTasks[date].map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              status: task.status === "unmake" ? "in-progress" : "unmake",
+            }
+          : task
+      );
+    });
+
+    setScheduledTasks(updatedScheduledTasks);
+  };
+
+  const [renderCount, setRenderCount] = useState(0);
+
+  useEffect(() => {
+    setRenderCount((prevCount) => prevCount + 1);
+  }, [scheduledTasks]);
+
+  const handleDeleteTask = (taskId) => {
+    const updatedTasks = data.filter((task) => task.id !== taskId);
+    setData([...updatedTasks]);
+
+    const updatedScheduledTasks = { ...scheduledTasks };
+    Object.keys(updatedScheduledTasks).forEach((date) => {
+      updatedScheduledTasks[date] = updatedScheduledTasks[date].filter(
+        (task) => task.id !== taskId
+      );
+    });
+
+    setScheduledTasks(updatedScheduledTasks);
   };
 
   useEffect(() => {
@@ -317,20 +349,36 @@ const ViewTasks = () => {
           >
             <i className="fa-solid fa-notes-medical"></i>
           </div>
-          <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center px-[20px]">
+          <div className="w-full h-[50px] border-1 rounded bg-bg-light flex items-center justify-center sm:px-[20px] px-[10px]">
             <div className="flex w-full items-center justify-between font-Nunito font-bold gap-[20px]">
               <div className="flex flex-1 items-center justify-between gap-[10px]">
-                <h1>{plan.name}</h1>
-                <div className="flex items-center">
-                  <div className="w-[120px] bg-color-dark-800 rounded h-[5px]">
-                    <div
-                      className="bg-bg-btn-add h-[4px] rounded transition-all duration-500"
-                      style={{ width: `${progressPercentage}%` }}
-                    ></div>
+                <h1 className="sm:block hidden">{plan.name}</h1>
+                <div className="flex flex-1 items-center gap-[20px] sm:justify-end justify-between">
+                  <div className="flex items-center">
+                    <div className="sm:w-[120px] min-w-[80px]  bg-color-dark-800 rounded h-[5px]">
+                      <div
+                        className="bg-bg-btn-add h-[4px] rounded transition-all duration-500"
+                        style={{ width: `${progressPercentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 text-[0.8rem] ">
+                      {progressPercentage}%
+                    </span>
                   </div>
-                  <span className="ml-2 text-sm">{progressPercentage}%</span>
+
+                  <select
+                    className="text-[0.8rem] max-h-[120px] overflow-auto text-text-dark-900 outline-none border-1 rounded-[5px] sm:px-[10px] px-[5px] py-[2px] "
+                    onChange={handleSelectChange}
+                  >
+                    {Object.keys(scheduledTasks).map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
+
               <div
                 className="square-container-s modifyButton flex items-center justify-center border-1 rounded-[5px] cursor-pointer text-text-dark-600 hover:text-text-dark-1000"
                 onClick={openModifyModal}
@@ -339,6 +387,7 @@ const ViewTasks = () => {
               </div>
             </div>
           </div>
+
           {isAddModal && (
             <AddTask
               plan={plan}
@@ -349,7 +398,11 @@ const ViewTasks = () => {
             />
           )}
         </div>
-
+        <div className="w-full  sm:hidden flex items-center justify-between gap-[10px] ">
+          <div className="w-full flex items-center  min-h-[40px]  justify-center border-1 rounded-[5px] text-[1rem]  bg-text-light font-Nunito font-bold px-[10px] py-[5px]">
+            <h1>{plan.name}</h1>
+          </div>
+        </div>
         <div className="w-full height-container-taskdetails flex flex-col gap-2 border-1 rounded bg-bg-light flex-1">
           <div
             className="flex w-full overflow-auto custom-scrollbar-1"
@@ -366,6 +419,7 @@ const ViewTasks = () => {
                 plan={plan}
                 onCompelte={handleCompleteTask}
                 onProgress={handleProgressTask}
+                onDeleteTask={handleDeleteTask}
                 index={index}
               />
             ))}

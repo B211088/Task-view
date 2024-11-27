@@ -7,6 +7,7 @@ export const taskLoader = async ({ params: { taskId } }) => {
       content
       estimatedCompletionTime
       timeSchedule
+      timeIsPlay
       startDay
       status
       priority {      

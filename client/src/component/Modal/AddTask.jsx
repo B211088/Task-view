@@ -24,8 +24,6 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
     setNotifyModal(false);
   };
 
-  console.log(plan.tasks.length);
-
   const openNotifyModal = () => {
     setNotifyModal(true);
   };
@@ -76,6 +74,8 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       return;
     }
 
+    const estimatedCompletionTimeNumber = Number(data.estimatedCompletionTime);
+
     if (inputDate > planEndDate) {
       setNotify({
         payload: "Ngày bắt đầu công việc đã quá hạn kết thúc của kế hoạch!!!",
@@ -92,7 +92,7 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
 
     if (plan.autoPlan) {
       let estimatedEndDate = new Date(planStartDate);
-      for (let i = 0; i < data.estimatedCompletionTime; i++) {
+      for (let i = 1; i < data.estimatedCompletionTime; i++) {
         estimatedEndDate = getEndDate(estimatedEndDate, 1);
       }
       if (estimatedEndDate > planEndDate) {
@@ -120,17 +120,19 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
 
     if (isNaN(estimatedCompletionTime) || estimatedCompletionTime < 1) {
       throw new Error(
-        "Estimated Completion Time must be a valid number and greater than or equal to 1."
+        "thời gian cần để hoàn thành phải lớn hơn hoặc bằng 1 ngày"
       );
     }
 
-    if (plan.tasks.length >= plan.maxTasksPerDay) {
-      openNotifyModal();
-      setNotify({
-        payload: `số lượng công việc của ngày ${checkDate} đã đạt giới hạn vui lòng tăng giới hạn để nhập thêm công việc`,
-        type: "warning",
-      });
-      return;
+    if (plan.autoPlan === false) {
+      if (plan.tasks.length >= plan.maxTasksPerDay) {
+        openNotifyModal();
+        setNotify({
+          payload: `số lượng công việc của ngày ${checkDate} đã đạt giới hạn vui lòng tăng giới hạn để nhập thêm công việc`,
+          type: "warning",
+        });
+        return;
+      }
     }
 
     if (data.startDay !== "") {
@@ -143,6 +145,11 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
       console.log(newData);
 
       await addTask(newData);
+      openNotifyModal();
+      setNotify({
+        payload: `thêm công việc thành công`,
+        type: "success",
+      });
       onSuccess(data);
       onClose();
     } else {
@@ -151,6 +158,11 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
 
       await addTask(newData);
       onSuccess(data);
+      openNotifyModal();
+      setNotify({
+        payload: `thêm công việc thành công`,
+        type: "success",
+      });
       onClose();
     }
   };
@@ -261,7 +273,7 @@ const AddTask = ({ autoPlan, onClose, priorities, plan, onSuccess }) => {
                 <input
                   name="estimatedCompletionTime"
                   className="w-full h-[36px] border-1 outline-none text-[0.8rem] px-[10px] rounded-[5px]"
-                  type="Number"
+                  type="number"
                   placeholder="Thêm số ngày cần để hoàn thành công viẹc"
                   value={data.estimatedCompletionTime}
                   onChange={handleChange}

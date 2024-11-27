@@ -6,7 +6,7 @@ import Plan from "../Plan/Plan";
 import ConfirmModal from "../Modal/ConfirmModal";
 import { deletePlan } from "../../utils/plansUtils";
 
-const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
+const Sidebar = ({ plans, handleModalClick, refSideBar, closeSideBar }) => {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [isAddPlanModalOpen, setIsAddPlanModalOpen] = useState(false);
@@ -14,10 +14,10 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
 
-  const [searchParams, setSearchParams] = useSearchParams();
   const [confirmModal, setConfirmModal] = useState(false);
   const [notify, setNotify] = useState({ payload: "", type: "" });
   const [planId, setPlanId] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
   const popupName = searchParams.get("popup");
   const navigate = useNavigate();
   const filterRef = useRef(null);
@@ -25,8 +25,6 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
   const closeConfirmModal = () => {
     setConfirmModal(false);
   };
-
-  console.log(plans);
 
   const openConfirmModal = (planId) => {
     setNotify({
@@ -123,10 +121,16 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
 
   return (
     <div
-      className="w-[100%]  height-container flex flex-col gap-[10px] sm:px-[8px] sm:py-[10px] py-[15px] px-[5px] border-1 shadow rounded-[5px] bg-bg-light "
+      className="w-[100%]  height-container flex flex-col gap-[10px] sm:px-[8px] sm:rounded-[5px] rounded-[0px] sm:py-[10px] py-[15px] px-[10px] border-1 shadow  bg-bg-light "
       onClick={handleModalClick}
       ref={refSideBar}
     >
+      <div
+        className="w-[30px] h-[30px] text-[1.2rem] rounded-[5px] sm:hidden items-center justify-center border-1 cursor-pointer  flex"
+        onClick={closeSideBar}
+      >
+        <i className="fa-solid fa-arrow-left"></i>
+      </div>
       <div className="flex items-center gap-[10px] justify-between ">
         <h3 className="text-[0.8rem] font-Montserrat font-bold sm:block">
           Kế hoạch của bạn
@@ -147,8 +151,8 @@ const Sidebar = ({ plans, handleModalClick, refSideBar }) => {
         </div>
       </div>
       <div className="flex items-center justify-between gap-[15px] flex-row ">
-        <div className="flex w-full items-center justify-between ] h-[34px] text-[13px] rounded-[5px] bg-color-dark-900 cursor-pointer sm:p-[5px] p-[0px] sm:pr-[0px]">
-          <div className=" flex items-center sm:h-full h-[34px] rounded-[5px] bg-color-dark-900  sp-[0px] p-[5px] sm:border-none">
+        <div className="flex w-full items-center justify-between ] h-[34px] text-[13px] rounded-[5px] bg-color-dark-900 cursor-pointer sm:p-[5px] px-[10px] sm:pr-[0px]">
+          <div className=" flex w-full items-center sm:h-full h-[34px] rounded-[5px] bg-color-dark-900   sm:border-none">
             <input
               className="outline-none w-full rounded-[5px] px-[5px] search-input h-full"
               type="text"
