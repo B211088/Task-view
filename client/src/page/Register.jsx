@@ -192,7 +192,7 @@ const Register = () => {
                 type="email"
                 name="gmail"
                 className="w-full border-1 rounded-[5px] h-[40px] px-[5px] outline-none"
-                placeholder="Email"
+                placeholder="email"
                 value={registerForm.gmail}
                 onChange={handleChange}
               />

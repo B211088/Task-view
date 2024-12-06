@@ -83,7 +83,7 @@ const Header = ({ openSideBar }) => {
         <div className="text-[1rem] font-Nunito font-bold sm:flex hidden">
           {userDisplayName}
         </div>
-        <div className="square-container-l rounded-full flex items-center justify-center ">
+        <div className="h-[50px] w-[50px]  rounded-full flex items-center justify-center ">
           {photoURL ? (
             <img
               className="w-full h-full rounded-full object-cover"
