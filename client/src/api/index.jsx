@@ -1,9 +1,10 @@
 import axios from "axios";
+import { GRAPHQL_SERVER } from "../utils/constants";
 
 export const registerUser = async (userData) => {
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/auth/register",
+      `${GRAPHQL_SERVER}/api/auth/register`,
       userData
     );
     return response.data;
@@ -15,7 +16,7 @@ export const registerUser = async (userData) => {
 export const loginUser = async (userData) => {
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/auth/login",
+      `${GRAPHQL_SERVER}/api/auth/login`,
       userData
     );
     return response.data;
@@ -30,7 +31,7 @@ export const getUserData = async (token) => {
       throw new Error("No token found");
     }
 
-    const response = await axios.get("http://localhost:5000/api/auth", {
+    const response = await axios.get(`${GRAPHQL_SERVER}/api/auth`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
