@@ -67,5 +67,3 @@ cron.schedule("*/5 * * * *", async () => {
     console.error("Ping tự gửi thất bại:", error.message);
   }
 });
-
-export default authorizationJWT;

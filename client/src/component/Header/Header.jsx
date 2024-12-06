@@ -1,6 +1,6 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthProvider";
-import UserMenu from "./userMenu";
+import UserMenu from "./UserMenu";
 import ConfirmModal from "../Modal/ConfirmModal";
 import logo from "../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
