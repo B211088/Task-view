@@ -46,8 +46,8 @@ const AuthProvider = ({ children }) => {
               });
 
               localStorage.setItem("accessToken", token);
-              navigate("/");
             }
+             navigate("/");
             setIsLoading(false);
             return;
           } catch (error) {
