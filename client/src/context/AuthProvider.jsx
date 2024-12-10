@@ -34,7 +34,7 @@ const AuthProvider = ({ children }) => {
         if (token) {
           try {
             const userData = await getUserData(token);
-            console.log("User", userData.user);
+           
 
             if (userData?.user) {
               const { name, gmail } = userData.user;
