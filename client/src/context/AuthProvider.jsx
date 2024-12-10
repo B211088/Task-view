@@ -46,8 +46,9 @@ const AuthProvider = ({ children }) => {
               });
 
               localStorage.setItem("accessToken", token);
+              navigate("/");
             }
-             navigate("/");
+          
             setIsLoading(false);
             return;
           } catch (error) {
@@ -66,7 +67,7 @@ const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, [auth, navigate]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
